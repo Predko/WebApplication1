@@ -22,6 +22,33 @@ namespace WebApplication1
         private IConfiguration Configuration { get; }
         private IWebHostEnvironment Environment { get; }
 
+        public static readonly string BeginHtmlPages =
+@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8""/>
+    <title>Main page</title>
+    <link rel =""stylesheet"" href=""/Styles/Site.css""/>
+    {0}
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href=""/index.html""> Pages </a></li>
+                <li><a href=""/customers""> Customers </a></li>
+                <li><a href=""/info""> Info </a></li>
+                <li><a href=""/disk_D""> disk D</a></li>
+            </ul>
+        </nav>
+    </header>";
+
+        public static readonly string EndHtmlPages =
+@"    <footer>
+    </footer>
+</body>
+";
+
         private StorageDatabase storage;
 
         public Startup(IWebHostEnvironment env, IConfiguration conf)
@@ -58,12 +85,6 @@ namespace WebApplication1
             });
 
             app.UseStaticFiles();
-
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\pages")),
-                RequestPath = new PathString("/html")
-            });
 
             app.UseEndpoints(endpoints =>
             {

@@ -1,0 +1,25 @@
+﻿header {
+    background-color: yellowgreen;
+    color: black;
+    /*margin: 5px;*/
+    padding: 5px;
+}
+
+nav ul li {
+    background-color: lightgray;
+    color: black;
+    margin: 10px;
+    padding: 10px;
+    display: inline;
+}
+
+nav ul {
+    list-style-type: none;
+}
+
+    nav ul li a {
+        text-decoration-line: none;
+    }
+
+body {
+}

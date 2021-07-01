@@ -44,58 +44,54 @@ namespace WebApplication1.Data
                 return;
             }
 
-            StringBuilder response = new("<!DOCTYPE html>" +
-                "\n<html>" +
-                "\n<head>" +
-                "\n<meta charset=\"utf-8\"/>" +
-                "\n<style>" +
-                "\nth,td {" +
-                "\npadding</td><td>3px;" +
-                "\n}" +
-                "\ntr:nth-child(even) {" +
-                "\nbackground</td><td>#ddd;" +
-                "\n}" +
-                "\ntr</td><td>nth - child(odd) {" +
-                "\nbackground</td><td>#eee;" +
-                "\n}" +
-                "\n</style>" +
-                "\n</head>" +
-                "\n<body>" +
-                "\n<h1>Список клиентов</h1>" +
-                "\n<table>" +
-                "\n<thead>" +
-                "\n<tr><th>УНП</th><th>Название организации</th></tr>" +
-                "\n</thead>" +
-                "\n<tbody>");
+            StringBuilder response = new(string.Format(Startup.BeginHtmlPages, "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />") +
+@"
+    <main>
+        <h1>Список клиентов</h1>
+        <table>
+            <thead>
+                <tr><th>УНП</th><th>Название организации</th></tr>
+            </thead>
+            <tbody>");
 
             foreach (DataRow row in storage["Customers"].Rows)
             {
                 string unp = row["UNP"] as string;
 
-                response.Append(string.Format("\n<tr id=\"{0}\"><td>{1}</td><td>{2}</td></tr>", row["Id"].ToString(), unp ?? "", row["NameCompany"]));
+                response.Append(string.Format("<tr id=\"{0}\"><td>{1}</td><td>{2}</td></tr>", row["Id"].ToString(), unp ?? "", row["NameCompany"]));
             }
 
-            response.Append("" +
-                "\n</tbody>" +
-                "\n</table>" +
-                "</script>" +
-                "\n</body>" +
-                "<script>" +
-                "document.querySelector('table').onclick = (event) => {" +
-                "var cell = event.target;" +
-                "if (cell.tagName.toLowerCase() != 'td')" +
-                    "return;" +
-                "var i = cell.parentNode.rowIndex;" +
-                "var j = cell.cellIndex;" +
-                "var currentTr = cell.parentNode;" +
-                "window.location.href = \"customers?customer=\" + currentTr.id" +
-                "}" +
-                "</script> " +
-                "\n<html>");
+            response.Append(
+@"            </tbody>
+        </table>
+    </main>" +
+
+Startup.EndHtmlPages + 
+
+@"
+<script>
+    document.querySelector('table').onclick = (event) => {
+        var cell = event.target;
+        if (cell.tagName.toLowerCase() != 'td')
+            return;
+        var i = cell.parentNode.rowIndex;
+        var j = cell.cellIndex;
+        var currentTr = cell.parentNode;
+        window.location.href = ""customers?customer="" + currentTr.id;
+    }
+</script> 
+<html>");
 
             await context.Response.WriteAsync(response.ToString());
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task ShowCustomer(HttpContext context, int id)
         {
             DataRow rowId = null;
@@ -110,36 +106,41 @@ namespace WebApplication1.Data
                 }
             }
 
-            StringBuilder response = new("" +
-                "<!DOCTYPE html>" +
-                "\n<html>" +
-                "\n<head>" +
-                "\n<meta charset=\"utf-8\"/>" +
-                "\n</head>" +
-                "\n<body>");
+            StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
+                                                       "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
 
             if (rowId == null)
             {
-                response.Append("\n<h1 color=\"red\">Указанный клиент не найден<h1>" +
-                    "\n</body>" +
-                    "\n<html>");
+                response.Append(
+@"
+    <main>
+        < h1 color=""red"">Указанный клиент не найден<h1>
+    </main>" +
+        
+        Startup.EndHtmlPages +
+@"
+<html>");
             }
             else
             {
-                response.Append("" +
-                    $"\n<table><h1>{rowId["NameCompany"]}</h1>" +
-                    $"\n<tr><td>УНП</td><td>{rowId["UNP"]}</td></tr>" +
-                    $"\n<tr><td>Расчётный счёт</td><td>{rowId["account"]}</td></tr>" +
-                    $"\n<tr><td>Город</td><td>{rowId["city"]}</td></tr>" +
-                    $"\n<tr><td>Дополнительный расчётный счёт</td><td>{rowId["account1"]}</td></tr>" +
-                    $"\n<tr><td>Область</td><td>{rowId["region"]}</td></tr>" +
-                    $"\n<tr><td>Номер телефона</td><td>{rowId["phoneNumber"]}</td></tr>" +
-                    $"\n<tr><td>Факс</td><td>{rowId["fax"]}</td></tr>" +
-                    $"\n<tr><td>Электронная почта</td><td>{rowId["mail"]}</td></tr>" +
-                    $"\n<tr><td>Файл с дополнительной информацией</td><td>{rowId["file"]}</td></tr>" +
-                    "\n</table>" +
-                    "\n</body>" +
-                    "\n<html>");
+                response.Append(@"
+    <main>
+        <table>
+            <tbody>" + 
+                $"<table><h1>{rowId["NameCompany"]}</h1>" +
+                    $"<tr><td>УНП</td><td>{rowId["UNP"]}</td></tr>" +
+                    $"<tr><td>Расчётный счёт</td><td>{rowId["account"]}</td></tr>" +
+                    $"<tr><td>Город</td><td>{rowId["city"]}</td></tr>" +
+                    $"<tr><td>Дополнительный расчётный счёт</td><td>{rowId["account1"]}</td></tr>" +
+                    $"<tr><td>Область</td><td>{rowId["region"]}</td></tr>" +
+                    $"<tr><td>Номер телефона</td><td>{rowId["phoneNumber"]}</td></tr>" +
+                    $"<tr><td>Факс</td><td>{rowId["fax"]}</td></tr>" +
+                    $"<tr><td>Электронная почта</td><td>{rowId["mail"]}</td></tr>" +
+                    $"<tr><td>Файл с дополнительной информацией</td><td>{rowId["file"]}</td></tr>" +
+                    "</table>" +
+                    "</main>" +
+                    Startup.EndHtmlPages +
+                    "<html>");
             }
 
             await context.Response.WriteAsync(response.ToString());
