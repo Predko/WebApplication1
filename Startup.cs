@@ -31,20 +31,20 @@ namespace WebApplication1
     <link rel =""stylesheet"" href=""/Styles/Site.css""/>
     {0}
 </head>
-<body>
-    <header>
+<body onresize=""resizebody()"" onload=""resizebody()"">
+    <header id=""header_body"">
         <nav>
             <ul>
-                <li><a href=""/index.html""> Pages </a></li>
-                <li><a href=""/customers""> Customers </a></li>
-                <li><a href=""/info""> Info </a></li>
-                <li><a href=""/disk_D""> disk D</a></li>
+                <li class=""menu-item""><a class=""menu-item-link"" href=""/index.html""> Pages </a></li>
+                <li class=""menu-item""><a class=""menu-item-link"" href=""/customers""> Customers </a></li>
+                <li class=""menu-item""><a class=""menu-item-link"" href=""/info""> Info </a></li>
+                <li class=""menu-item""><a class=""menu-item-link"" href=""/disk_D""> disk D</a></li>
             </ul>
         </nav>
     </header>";
 
         public static readonly string EndHtmlPages =
-@"    <footer>
+@"    <footer id=""footer_body"">
     </footer>
 </body>
 ";

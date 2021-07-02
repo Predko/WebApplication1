@@ -1,7 +1,37 @@
 ﻿
+#h1ListCustomers {
+    text-align:center;
+}
+
+#divTable {
+    overflow-y: auto;
+    height: 300px;
+    border: 2px solid black;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 0px solid black;
+}
+
+thead,th {
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky;
+    top: 0px;
+    background-color: lightgray;
+}
 
 th, td {
     padding: 3px;
+    min-width: 10em;
+}
+
+th:not(:first-child), td:not(:first-child) {
+    border-left: 1px solid black;
 }
 
 tr:nth-child(even) {
@@ -10,4 +40,23 @@ tr:nth-child(even) {
 
 tr:nth-child(odd) {
     background: #eee;
+}
+
+tbody tr:hover {
+    background-color: burlywood;
+}
+
+
+#h1ListCustomers {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+#titleTable {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+footer {
+    height: 20px;
 }
