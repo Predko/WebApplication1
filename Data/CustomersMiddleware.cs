@@ -44,34 +44,10 @@ namespace WebApplication1.Data
                 return;
             }
 
-            StringBuilder response = new(string.Format(Startup.BeginHtmlPages, "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />") +
+            StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
+                                                "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />") +
 @"
     <main>
-
-          <script>
-            function resizebody() {
-              var container = document.getElementById(""divTable"");
-              var titleTable = document.getElementById(""titleTable"");
-
-              var w = window,
-              d = document,
-              e = d.documentElement,
-              g = d.getElementsByTagName('body')[0],
-              y = w.innerHeight || e.clientHeight || g.clientHeight,
-              headerOffset = document.getElementById(""header_body"").offsetHeight,
-              footerOffset = document.getElementById(""footer_body"").offsetHeight,
-              stt = getComputedStyle(titleTable),
-              titleTableOffset = titleTable.offsetHeight,
-              styleBody = getComputedStyle(g);
-
-              container.style.height = (y - headerOffset - footerOffset - titleTableOffset 
-                                          - parseInt(stt.paddingBottom) 
-                                          - parseInt(stt.paddingTop)
-                                          - parseInt(styleBody.marginBottom)
-                                          - parseInt(styleBody.marginTop)) + ""px"";
-            }
-          </script>
-
         <div id=""titleTable""><h1 id=""h1ListCustomers"">Список клиентов</h1></div>
 
         <div style=""overflow-y:auto"" id=""divTable"">
@@ -92,11 +68,12 @@ namespace WebApplication1.Data
             {
                 string unp = row["UNP"] as string;
 
-                response.Append(string.Format("<tr id=\"{0}\"><td>{1}</td><td>{2}</td></tr>", row["Id"].ToString(), unp ?? "", row["NameCompany"]));
+                response.Append(string.Format("<tr id=\"{0}\"><td>{1}</td><td>{2}</td></tr>", 
+                                                row["Id"].ToString(), unp ?? "", row["NameCompany"]));
             }
 
-            response.Append(
-@"            </tbody>
+            response.Append(@"
+            </tbody>
         </table>
         </div>
     </main>" +
@@ -162,7 +139,7 @@ Startup.EndHtmlPages +
                     $"<tr><td>Файл с дополнительной информацией</td><td>{rowId["file"]}</td></tr>" +
                     "</table>" +
                     "</main>" +
-                    Startup.EndHtmlPages + "<html>");
+                    Startup.EndHtmlPages + "</html>");
             }
 
             await context.Response.WriteAsync(response.ToString());

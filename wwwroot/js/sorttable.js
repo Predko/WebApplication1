@@ -18,16 +18,12 @@ function getComparer(indexTh, asc)
             return  v1 - v2;
         }
 
-        //alert(v1.toString() + "\n" + v2.toString() + "\n" + v1.toString().localeCompare(v2));
-
         return v1.toString().localeCompare(v2);
     }
     
     var comparer =  function (a, b) { 
         return compareCells(getCellValue(asc ? a : b, indexTh), getCellValue(asc ? b : a, indexTh));
     }
-
-    //alert("ascending = " + asc + "\n" + comparer.toString());
 
     return comparer;
 }
@@ -54,8 +50,6 @@ function sortOrderTh(th) {
         case "disabled":
             return undefined;
     }
-    
-    alert(sortOrder + "\n" + resSortOrder);
 
     return resSortOrder;
 }
@@ -63,8 +57,6 @@ function sortOrderTh(th) {
 document.querySelectorAll('th')
         .forEach(th => th.addEventListener('click', 
             (() => {
-                    //alert("Sorting by " + th.innerHTML + "\n" + 
-                    //"Index " + Array.from(th.parentNode.children).indexOf(th))
                     var sortOrder = sortOrderTh(th);
                     if (sortOrder === undefined) { 
                         return;
@@ -73,6 +65,8 @@ document.querySelectorAll('th')
                     const tbody = table.querySelector('tbody');
                     Array.from(tbody.querySelectorAll('tr'))
                         .sort(getComparer(Array.from(th.parentNode.children).indexOf(th), sortOrder))
-                        .forEach(tr => tbody.appendChild(tr) );
+                        .forEach(tr => tbody.appendChild(tr));
+
+                    document.getElementById("divTable").scrollTop = 0;
                 }
             )));          
