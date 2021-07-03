@@ -84,11 +84,7 @@ namespace WebApplication1.Data
             </thead>
             <tbody>");
 
-            DataView dataViewTable = storage["Customers"].DefaultView;
-
-            dataViewTable.Sort = "NameCompany";
-
-            foreach (DataRowView row in dataViewTable)
+            foreach (DataRow row in storage["Customers"].Rows)
             {
                 string unp = row["UNP"] as string;
 
