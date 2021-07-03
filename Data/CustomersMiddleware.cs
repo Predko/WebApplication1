@@ -77,7 +77,10 @@ namespace WebApplication1.Data
         <div style=""overflow-y:auto"" id=""divTable"">
         <table>
             <thead>
-                <tr><th>УНП</th><th>Название организации</th></tr>
+                <tr>
+                    <th data-sort-order=""ascending"">УНП</th>
+                    <th data-sort-order=""ascending"">Название организации</th>
+                </tr>
             </thead>
             <tbody>");
 
@@ -98,20 +101,10 @@ namespace WebApplication1.Data
         </div>
     </main>" +
 
-Startup.EndHtmlPages + 
+Startup.EndHtmlPages +
 
-@"
-<script>
-    document.querySelector('table').onclick = (event) => {
-        var cell = event.target;
-        if (cell.tagName.toLowerCase() != 'td')
-            return;
-        var i = cell.parentNode.rowIndex;
-        var j = cell.cellIndex;
-        var currentTr = cell.parentNode;
-        window.location.href = ""customers?customer="" + currentTr.id;
-    }
-</script> 
+@"<script src=""js\sorttable.js"" type=""text/javascript""></script>
+<script src=""js\scripts.js"" type=""text/javascript""></script>
 <html>");
 
             await context.Response.WriteAsync(response.ToString());
@@ -149,7 +142,7 @@ Startup.EndHtmlPages +
         < h1 color=""red"">Указанный клиент не найден<h1>
     </main>" +
         
-        Startup.EndHtmlPages + "<html>");
+        Startup.EndHtmlPages + "</html>");
             }
             else
             {
