@@ -5,15 +5,17 @@ using System.Threading.Tasks;
 
 namespace StorageDatabaseNameSpace
 {
-    public class StorageDatabase : IStorageDatabase
+    public abstract class StorageDatabase : IStorageDatabase
     {
         /// <summary>
         /// Таблицы данных.
         /// </summary>
-        private readonly DataSet dataSet;
+        protected readonly DataSet dataSet;
 
-        private string connectionString;
-        
+        protected string connectionString;
+
+        protected string lastQueryString;
+
         public string ConnectionString { get => connectionString; set => connectionString = value; }
 
         /// <summary>
@@ -24,12 +26,14 @@ namespace StorageDatabaseNameSpace
         {
             ConnectionString = connectionString;
 
+            lastQueryString = null;
+
             dataSet = new DataSet();
         }
 
-        public void Add(DataTable dt) => dataSet.Tables.Add(dt);
+        public virtual void Add(DataTable dt) => dataSet.Tables.Add(dt);
 
-        public DataTable this[string name]
+        public virtual DataTable this[string name]
         {
             get
             {
@@ -40,99 +44,41 @@ namespace StorageDatabaseNameSpace
                 return dataSet.Tables[name];
             }
         }
-        
-        public void DataBaseUpdate(string nameTable, string queryString = null)
+
+        public virtual DataTable this[string name, string queryString]
         {
-            if (queryString == null)
+            get
             {
-                queryString = $"SELECT * FROM {nameTable}";
+                if (dataSet.Tables.Contains(name) == false || queryString != lastQueryString)
+                {
+                    AsynchronousLoadDataTable(name);
+                }
+
+                return dataSet.Tables[name];
             }
-
-            using SqlConnection sqlConnection = new(ConnectionString);
-
-            SqlDataAdapter dataAdapter = new(queryString, sqlConnection);
-
-            SqlCommandBuilder commandBuilder = new(dataAdapter);
-
-            string s = commandBuilder.GetInsertCommand().CommandText;
-
-            dataAdapter.Update(dataSet.Tables[nameTable]);
         }
 
-        public int AsynchronousDataBaseUpdate(string nameTable, string queryString = null)
+        public abstract void DataBaseUpdate(string nameTable, string queryString = null);
+
+        public virtual int AsynchronousDataBaseUpdate(string nameTable, string queryString = null)
         {
-            Task<int> updateTask = new Task<int>(() =>
-                        {
-                            if (queryString == null)
-                            {
-                                queryString = $"SELECT * FROM {nameTable}";
-                            }
-
-                            using SqlConnection sqlConnection = new(ConnectionString);
-
-                            SqlDataAdapter dataAdapter = new(queryString, sqlConnection);
-
-                            SqlCommandBuilder commandBuilder = new(dataAdapter);
-
-                            string s = commandBuilder.GetInsertCommand().CommandText;
-                            return dataAdapter.Update(dataSet.Tables[nameTable]);
-                        });
+            Task updateTask = new Task(() =>
+            {
+                DataBaseUpdate(nameTable, queryString);
+            });
 
             updateTask.Start();
 
-            return updateTask.Result;
+            return 0;
         }
 
-        public int LoadDataTable(string nameTable, string queryString = null)
-        {
-            string newQueryString = queryString;
+        public abstract int LoadDataTable(string nameTable, string queryString = null);
 
-            if (newQueryString == null)
-            {
-                newQueryString = $"SELECT * FROM {nameTable}";
-            }
-
-            SqlConnection sqlConnection = new(ConnectionString);
-
-            SqlDataAdapter dataAdapter = new(newQueryString, sqlConnection);
-
-            if (dataSet.Tables.Contains(nameTable) == true)
-            {
-                dataSet.Tables[nameTable].Clear();
-            }
-            else
-            {
-                dataSet.Tables.Add(nameTable);
-            }
-
-            return dataAdapter.Fill(dataSet.Tables[nameTable]);
-        }
-
-        public int AsynchronousLoadDataTable(string nameTable, string queryString = null)
+        public virtual int AsynchronousLoadDataTable(string nameTable, string queryString = null)
         {
             Task<int> loadTask = new Task<int>(() =>
             {
-                string newQueryString = queryString;
-
-                if (newQueryString == null)
-                {
-                    newQueryString = $"SELECT * FROM {nameTable}";
-                }
-
-                SqlConnection sqlConnection = new(ConnectionString);
-
-                SqlDataAdapter dataAdapter = new(newQueryString, sqlConnection);
-
-                if (dataSet.Tables.Contains(nameTable) == true)
-                {
-                    dataSet.Tables[nameTable].Clear();
-                }
-                else
-                {
-                    dataSet.Tables.Add(nameTable);
-                }
-
-                return dataAdapter.Fill(dataSet.Tables[nameTable]);
+                return LoadDataTable(nameTable, queryString);
             });
 
             loadTask.Start();
@@ -140,6 +86,6 @@ namespace StorageDatabaseNameSpace
             return loadTask.Result;
         }
 
-        public void AcceptChanges(string nameTable) => this[nameTable].AcceptChanges();
+        public virtual void AcceptChanges(string nameTable) => this[nameTable].AcceptChanges();
     }
 }

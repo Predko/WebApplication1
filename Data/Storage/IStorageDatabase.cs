@@ -12,6 +12,14 @@ namespace StorageDatabaseNameSpace
         DataTable this[string name] { get; }
 
         /// <summary>
+        /// Возвращает таблицу с именем name, включающей данные запроса queryString.
+        /// </summary>
+        /// <param name="name">Имя таблицы.</param>
+        /// <param name="queryString">Строка запроса.</param>
+        /// <returns>Таблица DataTable.</returns>
+        DataTable this[string name, string queryString] { get; }
+
+        /// <summary>
         /// Строка подключения к данным.
         /// </summary>
         string ConnectionString { get; set; }

@@ -49,7 +49,7 @@ namespace WebApplication1
 </body>
 ";
 
-        private IStorageDatabase storage;
+        private StorageDatabase storage;
 
         public Startup(IWebHostEnvironment env, IConfiguration conf)
         {

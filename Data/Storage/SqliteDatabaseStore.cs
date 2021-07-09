@@ -9,44 +9,15 @@ using System.IO;
 
 namespace StorageDatabaseNameSpace
 {
-    public partial class SqliteDatabaseStore : IStorageDatabase
+    public partial class SqliteDatabaseStore : StorageDatabase
     {
-        /// <summary>
-        /// Таблицы данных.
-        /// </summary>
-        private readonly DataSet dataSet;
-
-        private string connectionString;
-
-        public string ConnectionString { get => connectionString; set => connectionString = value; }
-
         /// <summary>
         /// Конструктор хранилиша данных.
         /// </summary>
         /// <param name="connectionString">Строка подключения к базе данных.</param>
-        public SqliteDatabaseStore(string connectionString)
-        {
-            ConnectionString = connectionString;
-
-            dataSet = new DataSet();
-        }
-
-        public void Add(DataTable dt) => dataSet.Tables.Add(dt);
-
-        public DataTable this[string name]
-        {
-            get
-            {
-                if (dataSet.Tables.Contains(name) == false)
-                {
-                    AsynchronousLoadDataTable(name);
-                }
-
-                return dataSet.Tables[name];
-            }
-        }
-
-        public void DataBaseUpdate(string nameTable, string queryString = null)
+        public SqliteDatabaseStore(string connectionString) : base(connectionString) { }
+        
+        public override  void DataBaseUpdate(string nameTable, string queryString = null)
         {
             DataTable dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Added);
 
@@ -73,6 +44,8 @@ namespace StorageDatabaseNameSpace
                 dt.TableName = nameTable;
                 ExecuteDeleteCommand(dt, columnsAndValues);
             }
+
+            dataSet.Tables[nameTable].AcceptChanges();
         }
 
         private int ExecuteInsertCommand(DataTable dt, ColumnsAndValuesInfo columnsAndValues)
@@ -218,19 +191,7 @@ namespace StorageDatabaseNameSpace
             return lc.ToString();
         }
 
-        public int AsynchronousDataBaseUpdate(string nameTable, string queryString = null)
-        {
-            Task updateTask = new Task(() =>
-                        {
-                            DataBaseUpdate(nameTable, queryString);
-                        });
-
-            updateTask.Start();
-
-            return 0; //updateTask.Result;
-        }
-
-        public int LoadDataTable(string nameTable, string queryString = null)
+        public override int LoadDataTable(string nameTable, string queryString = null)
         {
             string newQueryString = queryString;
 
@@ -300,6 +261,8 @@ namespace StorageDatabaseNameSpace
                 }
 
                 connection.Close();
+
+                lastQueryString = newQueryString;
             }
 
             return count;
@@ -342,19 +305,5 @@ namespace StorageDatabaseNameSpace
 
             return dt;
         }
-
-        public int AsynchronousLoadDataTable(string nameTable, string queryString = null)
-        {
-            Task<int> loadTask = new Task<int>(() =>
-            {
-                return LoadDataTable(nameTable, queryString);
-            });
-
-            loadTask.Start();
-
-            return loadTask.Result;
-        }
-
-        public void AcceptChanges(string nameTable) => this[nameTable].AcceptChanges();
     }
 }

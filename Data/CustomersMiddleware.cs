@@ -16,7 +16,7 @@ namespace WebApplication1.Data
 
         private readonly IStorageDatabase storage;
 
-        public CustomersMiddleware(RequestDelegate next, IStorageDatabase storage)
+        public CustomersMiddleware(RequestDelegate next, StorageDatabase storage)
         {
             Next = next;
 
@@ -110,22 +110,12 @@ Startup.EndHtmlPages +
         /// <returns></returns>
         public async Task ShowCustomer(HttpContext context, int id)
         {
-            DataRow rowId = null;
-
-            foreach (DataRow row in storage["Customers"].Rows)
-            {
-                if ((long)row["Id"] == id)
-                {
-                    rowId = row;
-
-                    break;
-                }
-            }
+            DataRow row = storage["Customers", $"SELECT * FROM Customers WHERE Id='{id}'"].Rows[0];
 
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                                        "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
 
-            if (rowId == null)
+            if (row == null)
             {
                 response.Append(
 @"
@@ -138,19 +128,19 @@ Startup.EndHtmlPages +
             else
             {
                 response.Append("" +
-    $"<main><h1>{rowId["NameCompany"]}</h1>" +
+    $"<main><h1>{row["NameCompany"]}</h1>" +
         "<table>" +
             "<tbody>" + 
                 "<table>" +
-                    $"<tr><td>УНП</td><td>{rowId["UNP"]}</td></tr>" +
-                    $"<tr><td>Расчётный счёт</td><td>{rowId["account"]}</td></tr>" +
-                    $"<tr><td>Город</td><td>{rowId["city"]}</td></tr>" +
-                    $"<tr><td>Дополнительный расчётный счёт</td><td>{rowId["account1"]}</td></tr>" +
-                    $"<tr><td>Область</td><td>{rowId["region"]}</td></tr>" +
-                    $"<tr><td>Номер телефона</td><td>{rowId["phoneNumber"]}</td></tr>" +
-                    $"<tr><td>Факс</td><td>{rowId["fax"]}</td></tr>" +
-                    $"<tr><td>Электронная почта</td><td>{rowId["mail"]}</td></tr>" +
-                    $"<tr><td>Файл с дополнительной информацией</td><td>{rowId["file"]}</td></tr>" +
+                    $"<tr><td>УНП</td><td>{row["UNP"]}</td></tr>" +
+                    $"<tr><td>Расчётный счёт</td><td>{row["account"]}</td></tr>" +
+                    $"<tr><td>Город</td><td>{row["city"]}</td></tr>" +
+                    $"<tr><td>Дополнительный расчётный счёт</td><td>{row["account1"]}</td></tr>" +
+                    $"<tr><td>Область</td><td>{row["region"]}</td></tr>" +
+                    $"<tr><td>Номер телефона</td><td>{row["phoneNumber"]}</td></tr>" +
+                    $"<tr><td>Факс</td><td>{row["fax"]}</td></tr>" +
+                    $"<tr><td>Электронная почта</td><td>{row["mail"]}</td></tr>" +
+                    $"<tr><td>Файл с дополнительной информацией</td><td>{row["file"]}</td></tr>" +
                     "</table>" +
                     "</main>" +
                     Startup.EndHtmlPages + "</html>");
