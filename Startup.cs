@@ -49,14 +49,14 @@ namespace WebApplication1
 </body>
 ";
 
-        private StorageDatabase storage;
+        private IStorageDatabase storage;
 
         public Startup(IWebHostEnvironment env, IConfiguration conf)
         {
             Configuration = conf;
             Environment = env;
 
-            storage = new(Configuration.GetConnectionString("CustomersDatabase"));
+            storage = new SqliteDatabaseStore(Configuration.GetConnectionString("CustomersSqliteDatabase"));
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

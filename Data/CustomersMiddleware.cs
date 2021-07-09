@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Data.Sqlite;
 using StorageDatabaseNameSpace;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,9 @@ namespace WebApplication1.Data
     {
         private RequestDelegate Next { get; }
 
-        private readonly StorageDatabase storage;
+        private readonly IStorageDatabase storage;
 
-        public CustomersMiddleware(RequestDelegate next, StorageDatabase storage)
+        public CustomersMiddleware(RequestDelegate next, IStorageDatabase storage)
         {
             Next = next;
 
@@ -60,7 +61,20 @@ namespace WebApplication1.Data
             </thead>
             <tbody>");
 
-            DataView dataViewTable = storage["Customers"].DefaultView;
+            DataView dataViewTable;
+
+            try
+            {
+                dataViewTable = storage["Customers"].DefaultView;
+            }
+            catch(SqliteException ex)
+            {
+                response.Clear().Append(ex.Message);
+
+                await context.Response.WriteAsync(response.ToString());
+
+                return;
+            }
 
             dataViewTable.Sort = "NameCompany";
 
@@ -100,7 +114,7 @@ Startup.EndHtmlPages +
 
             foreach (DataRow row in storage["Customers"].Rows)
             {
-                if ((int)row["Id"] == id)
+                if ((long)row["Id"] == id)
                 {
                     rowId = row;
 
@@ -123,11 +137,11 @@ Startup.EndHtmlPages +
             }
             else
             {
-                response.Append(@"
-    <main>
-        <table>
-            <tbody>" + 
-                $"<table><h1>{rowId["NameCompany"]}</h1>" +
+                response.Append("" +
+    $"<main><h1>{rowId["NameCompany"]}</h1>" +
+        "<table>" +
+            "<tbody>" + 
+                "<table>" +
                     $"<tr><td>УНП</td><td>{rowId["UNP"]}</td></tr>" +
                     $"<tr><td>Расчётный счёт</td><td>{rowId["account"]}</td></tr>" +
                     $"<tr><td>Город</td><td>{rowId["city"]}</td></tr>" +

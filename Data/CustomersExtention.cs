@@ -9,7 +9,7 @@ namespace WebApplication1.Data
 {
     public static class CustomersExtention
     {
-        public static IApplicationBuilder UseCustomers(this IApplicationBuilder builder, StorageDatabase storage)
+        public static IApplicationBuilder UseCustomers(this IApplicationBuilder builder, IStorageDatabase storage)
         {
             return builder.UseMiddleware<CustomersMiddleware>(storage);
         }

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="5.0.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\Data\Customers.sqlite">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="wwwroot\js\scripts.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
