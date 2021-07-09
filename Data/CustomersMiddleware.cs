@@ -14,7 +14,7 @@ namespace WebApplication1.Data
     {
         private RequestDelegate Next { get; }
 
-        private readonly IStorageDatabase storage;
+        private readonly StorageDatabase storage;
 
         public CustomersMiddleware(RequestDelegate next, StorageDatabase storage)
         {
@@ -45,8 +45,21 @@ namespace WebApplication1.Data
                 return;
             }
 
+            await ShowListCustomers(context);
+        }
+
+
+        /// <summary>
+        /// Отображает список клиентов.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public async Task ShowListCustomers(HttpContext context)
+        {
+
+
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
-                                                "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />") +
+                                            "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />") +
 @"
     <main>
         <div id=""titleTable""><h1 id=""h1ListCustomers"">Список клиентов</h1></div>
@@ -67,7 +80,7 @@ namespace WebApplication1.Data
             {
                 dataViewTable = storage["Customers"].DefaultView;
             }
-            catch(SqliteException ex)
+            catch (SqliteException ex)
             {
                 response.Clear().Append(ex.Message);
 
@@ -82,7 +95,7 @@ namespace WebApplication1.Data
             {
                 string unp = row["UNP"] as string;
 
-                response.Append(string.Format("<tr id=\"{0}\"><td>{1}</td><td>{2}</td></tr>", 
+                response.Append(string.Format("<tr id=\"{0}\"><td>{1}</td><td>{2}</td></tr>",
                                                 row["Id"].ToString(), unp ?? "", row["NameCompany"]));
             }
 
@@ -92,14 +105,15 @@ namespace WebApplication1.Data
         </div>
     </main>" +
 
-Startup.EndHtmlPages +
+            Startup.EndHtmlPages +
 
-@"<script src=""js\sorttable.js"" type=""text/javascript""></script>
+            @"<script src=""js\sorttable.js"" type=""text/javascript""></script>
 <script src=""js\scripts.js"" type=""text/javascript""></script>
 <html>");
 
             await context.Response.WriteAsync(response.ToString());
         }
+
 
 
         /// <summary>
@@ -122,7 +136,7 @@ Startup.EndHtmlPages +
     <main>
         < h1 color=""red"">Указанный клиент не найден<h1>
     </main>" +
-        
+
         Startup.EndHtmlPages + "</html>");
             }
             else
@@ -130,7 +144,7 @@ Startup.EndHtmlPages +
                 response.Append("" +
     $"<main><h1>{row["NameCompany"]}</h1>" +
         "<table>" +
-            "<tbody>" + 
+            "<tbody>" +
                 "<table>" +
                     $"<tr><td>УНП</td><td>{row["UNP"]}</td></tr>" +
                     $"<tr><td>Расчётный счёт</td><td>{row["account"]}</td></tr>" +
