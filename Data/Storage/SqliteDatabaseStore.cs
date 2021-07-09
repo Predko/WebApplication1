@@ -17,16 +17,18 @@ namespace StorageDatabaseNameSpace
         /// <param name="connectionString">Строка подключения к базе данных.</param>
         public SqliteDatabaseStore(string connectionString) : base(connectionString) { }
         
-        public override  void DataBaseUpdate(string nameTable, string queryString = null)
+        public override int UpdateDataTable(string nameTable, string queryString = null)
         {
             DataTable dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Added);
 
             ColumnsAndValuesInfo columnsAndValues = new(dt);
 
+            int count = 0;
+
             if (dt != null)
             {
                 dt.TableName = nameTable;
-                ExecuteInsertCommand(dt, columnsAndValues);
+                count = ExecuteInsertCommand(dt, columnsAndValues);
             }
 
             dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Modified);
@@ -34,7 +36,7 @@ namespace StorageDatabaseNameSpace
             if (dt != null)
             {
                 dt.TableName = nameTable;
-                ExecuteUpdateCommand(dt, columnsAndValues);
+                count = ExecuteUpdateCommand(dt, columnsAndValues);
             }
 
             dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Deleted);
@@ -42,10 +44,12 @@ namespace StorageDatabaseNameSpace
             if (dt != null)
             {
                 dt.TableName = nameTable;
-                ExecuteDeleteCommand(dt, columnsAndValues);
+                count = ExecuteDeleteCommand(dt, columnsAndValues);
             }
 
             dataSet.Tables[nameTable].AcceptChanges();
+
+            return count;
         }
 
         private int ExecuteInsertCommand(DataTable dt, ColumnsAndValuesInfo columnsAndValues)
@@ -261,8 +265,6 @@ namespace StorageDatabaseNameSpace
                 }
 
                 connection.Close();
-
-                lastQueryString = newQueryString;
             }
 
             return count;

@@ -2,6 +2,8 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace StorageDatabaseNameSpace
 {
@@ -14,7 +16,9 @@ namespace StorageDatabaseNameSpace
 
         protected string connectionString;
 
-        protected string lastQueryString;
+        protected Dictionary<string, string> lastQueryString = new();
+
+        protected string SelectAllQueryString = "SELECT * FROM";
 
         public string ConnectionString { get => connectionString; set => connectionString = value; }
 
@@ -26,8 +30,6 @@ namespace StorageDatabaseNameSpace
         {
             ConnectionString = connectionString;
 
-            lastQueryString = null;
-
             dataSet = new DataSet();
         }
 
@@ -37,9 +39,13 @@ namespace StorageDatabaseNameSpace
         {
             get
             {
-                if (dataSet.Tables.Contains(name) == false)
+                string selectAll = SelectAllQueryString + $" {name}";
+
+                if (dataSet.Tables.Contains(name) == false || lastQueryString.GetValueOrDefault(name, "") != selectAll)
                 {
-                    LoadDataTable(name);
+                    LoadDataTable(name, selectAll);
+
+                    lastQueryString[name] = selectAll;
                 }
                 return dataSet.Tables[name];
             }
@@ -49,42 +55,26 @@ namespace StorageDatabaseNameSpace
         {
             get
             {
-                if (dataSet.Tables.Contains(name) == false || queryString != lastQueryString)
+                if (dataSet.Tables.Contains(name) == false || queryString != lastQueryString.GetValueOrDefault(name, ""))
                 {
-                    AsynchronousLoadDataTable(name);
+                    LoadDataTable(name, queryString);
+
+                    lastQueryString[name] = queryString;
                 }
 
                 return dataSet.Tables[name];
             }
         }
 
-        public abstract void DataBaseUpdate(string nameTable, string queryString = null);
+        public abstract int UpdateDataTable(string nameTable, string queryString = null);
 
-        public virtual int AsynchronousDataBaseUpdate(string nameTable, string queryString = null)
-        {
-            Task updateTask = new Task(() =>
-            {
-                DataBaseUpdate(nameTable, queryString);
-            });
-
-            updateTask.Start();
-
-            return 0;
-        }
+        public virtual async Task<int> UpdateDataTableAsync(string nameTable, string queryString = null) => 
+                                    await Task.Run(() => UpdateDataTable(nameTable, queryString));
 
         public abstract int LoadDataTable(string nameTable, string queryString = null);
 
-        public virtual int AsynchronousLoadDataTable(string nameTable, string queryString = null)
-        {
-            Task<int> loadTask = new Task<int>(() =>
-            {
-                return LoadDataTable(nameTable, queryString);
-            });
-
-            loadTask.Start();
-
-            return loadTask.Result;
-        }
+        public virtual async Task<int> LoadDataTableAsync(string nameTable, string queryString = null) => 
+                                    await Task.Run(() => LoadDataTable(nameTable, queryString));
 
         public virtual void AcceptChanges(string nameTable) => this[nameTable].AcceptChanges();
     }

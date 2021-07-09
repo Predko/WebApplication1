@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Threading.Tasks;
 
 namespace StorageDatabaseNameSpace
 {
@@ -41,14 +42,14 @@ namespace StorageDatabaseNameSpace
         /// </summary>
         /// <param name="nameTable">Имя таблицы данных.</param>
         /// <param name="queryString">Строка запроса для загрузки базы данных или её части.</param>
-        int AsynchronousDataBaseUpdate(string nameTable, string queryString = null);
+        Task<int> UpdateDataTableAsync(string nameTable, string queryString = null);
 
         /// <summary>
         /// Обновляет базу данных из соответствующей таблицы данных.
         /// </summary>
         /// <param name="nameTable">Имя таблицы данных.</param>
         /// <param name="queryString">Строка запроса для загрузки базы данных или её части.</param>
-        void DataBaseUpdate(string nameTable, string queryString = null);
+        int UpdateDataTable(string nameTable, string queryString = null);
 
         /// <summary>
         /// Загружает указанную таблицу из базы данных.
@@ -66,7 +67,7 @@ namespace StorageDatabaseNameSpace
         /// <param name="nameTable"></param>
         /// <param name="queryString"></param>
         /// <returns>Количество записей.</returns>
-        public int AsynchronousLoadDataTable(string nameTable, string queryString = null);
+        public Task<int> LoadDataTableAsync(string nameTable, string queryString = null);
 
     }
 }

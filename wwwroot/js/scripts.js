@@ -10,11 +10,34 @@ function restoreScrollPosition() {
     var scrollTop = sessionStorage.getItem("currentScrollYPosition"),
         divScrollContainer = document.getElementById("divTable");
 
+    var indexTh = sessionStorage.getItem("Sort.ThIndex");
+
+    if (indexTh === undefined || indexTh === null) {
+        indexTh = 0;
+        sessionStorage.setItem("Sort.ThIndex", indexTh);
+        sessionStorage.setItem("Sort.Order.Th" + indexTh, true);
+    }
+
+    var so = sessionStorage.getItem("Sort.Order.Th" + indexTh);
+    var sortOrder = (so === undefined) ? undefined : so === 'true';
+
+    SortTable(sortOrder, divScrollContainer, indexTh);
+
     if (scrollTop && divScrollContainer) {
         divScrollContainer.scrollTop = scrollTop;
     }
 }
 
+
+function SortTable(sortOrder, divScrollContainer, indexTh) {
+    if (sortOrder !== undefined) {
+        const table = divScrollContainer.querySelector('table');
+        const tbody = table.querySelector('tbody');
+        Array.from(tbody.querySelectorAll('tr'))
+            .sort(getComparer(indexTh, sortOrder))
+            .forEach(tr => tbody.appendChild(tr));
+    }
+}
 
 document.querySelector('table').onclick = (event) => {
     var cell = event.target;
