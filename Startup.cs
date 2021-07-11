@@ -71,6 +71,7 @@ namespace WebApplication1
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseBrowserLink();
             }
 
             app.UseDefaultFiles();
@@ -106,6 +107,10 @@ namespace WebApplication1
             });
 
             app.UseCustomers(storage);
+
+            app.UseContracts(storage);
+
+            app.UseIncome(storage);
         }
     }
 }

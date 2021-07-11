@@ -13,5 +13,15 @@ namespace WebApplication1.Data
         {
             return builder.UseMiddleware<CustomersMiddleware>(storage);
         }
+
+        public static IApplicationBuilder UseContracts(this IApplicationBuilder builder, StorageDatabase storage)
+        {
+            return builder.UseMiddleware<ContractsMiddleware>(storage);
+        }
+
+        public static IApplicationBuilder UseIncome(this IApplicationBuilder builder, StorageDatabase storage)
+        {
+            return builder.UseMiddleware<IncomeMiddleware>(storage);
+        }
     }
 }

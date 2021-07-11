@@ -1,6 +1,11 @@
-﻿
+﻿*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 #h1ListCustomers {
-    text-align:center;
+    text-align: center;
 }
 
 #divTable {
@@ -15,7 +20,7 @@ table {
     border: 0px solid black;
 }
 
-thead,th {
+thead, th {
     position: -webkit-sticky;
     position: -moz-sticky;
     position: -ms-sticky;
@@ -30,9 +35,9 @@ th, td {
     min-width: 10em;
 }
 
-th:not(:first-child), td:not(:first-child) {
-    border-left: 1px solid black;
-}
+    th:not(:first-child), td:not(:first-child) {
+        border-left: 1px solid black;
+    }
 
 tr:nth-child(even) {
     background: #ddd;
@@ -59,4 +64,16 @@ tbody tr:hover {
 
 footer {
     height: 20px;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.context-menu--active {
+    display: block;
 }
