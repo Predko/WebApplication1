@@ -7,94 +7,42 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data
 {
-    public class IncomeMiddleware
+    public class IncomeMiddleware: AbstractCustomersMiddlware
     {
-        private RequestDelegate Next { get; }
+        protected override string TableName { get => "Income"; }
 
-        private StorageDatabase Storage { get; }
+        protected override string EntityName { get => "income"; }
 
-        public IncomeMiddleware(RequestDelegate next, StorageDatabase storage)
+        protected override string ListEntities { get => "/customers/income"; }
+
+        protected override string EditEntity { get => "/customers/income/edit"; }
+
+        protected override string DeleteEntity { get => "/customers/income/delete"; }
+
+        protected override string NewEntity { get => "/customers/income/new"; }
+
+        public IncomeMiddleware(RequestDelegate next, StorageDatabase storage): base(next, storage)
         {
-            Next = next;
-            Storage = storage;
         }
 
-        public async Task InvokeAsync(HttpContext context)
-        {
-            string path = context.Request.Path;
+        //protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
+        //{
+        //    throw new NotImplementedException(); return true;
+        //}
 
-            context.Response.ContentType = "text/html; charset=utf-8";
+        //protected override async Task ShowEditEntity(HttpContext context, int customerId, int? incomeId)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
+        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? incomeId)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-            string customer_Id = context.Request.Query["customer"];
-            string income_Id = context.Request.Query["income"];
-
-            if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
-            {
-                customerId = 0;
-            }
-
-            if (string.IsNullOrWhiteSpace(income_Id) == true || int.TryParse(income_Id, out int incomeId) == false)
-            {
-                incomeId = 0;
-            }
-
-            switch (path)
-            {
-                case "/customers/income":
-                    await ShowListIncome(context);
-                    break;
-
-                case "/customers/income/edit":
-                    if (customerId != 0 && incomeId != 0)
-                    {
-                        await ShowEditIncome(context, customerId, incomeId);
-                    }
-                    break;
-
-                case "/customers/income/delete":
-                    if (customerId != 0 && incomeId != 0)
-                    {
-                        await ShowDeleteIncome(context, customerId, incomeId);
-                    }
-
-                    break;
-
-                case "/customers/income/new":
-                    if (customerId != 0)
-                    {
-                        await ShowNewIncome(context, customerId);
-                    }
-
-                    break;
-
-                default:
-
-                    await Next.Invoke(context);
-                    break;
-            }
-
-
-        }
-
-        private Task ShowNewIncome(HttpContext context, int customerId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private Task ShowDeleteIncome(HttpContext context, int customerId, int incomeId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private Task ShowEditIncome(HttpContext context, int customerId, int incomeId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private Task ShowListIncome(HttpContext context)
-        {
-            throw new NotImplementedException();
-        }
+        //protected override async Task ShowNewEntity(HttpContext context, int customerId)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

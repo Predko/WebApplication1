@@ -7,106 +7,37 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data
 {
-    public class ContractsMiddleware
+    public class ContractsMiddleware: AbstractCustomersMiddlware
     {
-        private RequestDelegate Next { get; }
+        protected override string TableName { get => "Contracts"; }
 
-        private StorageDatabase Storage { get; }
+        protected override string EntityName { get => "contract"; }
 
-        public ContractsMiddleware(RequestDelegate next, StorageDatabase storage)
+        protected override string ListEntities { get => "/customers/contracts"; }
+
+        protected override string EditEntity { get => "/customers/contracts/edit"; }
+
+        protected override string DeleteEntity { get => "/customers/contracts/delete"; }
+
+        protected override string NewEntity { get => "/customers/contracts/new"; }
+
+        public ContractsMiddleware(RequestDelegate next, StorageDatabase storage): base(next, storage)
         {
-            Next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context)
-        {
-            string path = context.Request.Path.Value.ToLower();
+        //protected override async Task<bool> ShowListOfEntities(HttpContext context, int id)
+        //{
+        //    await context.Response.WriteAsync("Список договоров"); return true;
+        //}
 
-            context.Response.ContentType = "text/html;charset=utf-8";
+        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? contractId)
+        //{
+        //    await context.Response.WriteAsync("Редактирование договора с id = " + contractId + ", клиента с id = " + customerId);
+        //}
 
-            string customer_Id = context.Request.Query["customer"];
-
-            string contract_Id = context.Request.Query["contract"];
-
-            if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
-            {
-                customerId = 0;
-            }
-
-            if (string.IsNullOrWhiteSpace(contract_Id) == true || int.TryParse(contract_Id, out int contractId) == false)
-            {
-                contractId = 0;
-            }
-
-            switch (path)
-            {
-                case "/customers/contracts":
-
-                    if (customerId != 0)
-                    {
-                        await ShowListContracts(context, customerId);
-                        return;
-                    }
-
-                    await context.Response.WriteAsync("Ошибка в строке запроса");
-                    return;
-
-                case "/customers/contracts/edit":
-
-                    if (customerId != 0 && contractId != 0)
-                    {
-                        await ShowDeleteContract(context, customerId, contractId);
-
-                        return;
-                    }
-
-                    await context.Response.WriteAsync("Ошибка в строке запроса");
-                    return;
-
-                case "/customers/contracts/delete":
-
-                    if (customerId != 0 && contractId != 0)
-                    {
-                        await ShowDeleteContract(context, customerId, contractId);
-
-                        return;
-                    }
-
-                    await context.Response.WriteAsync("Ошибка в строке запроса");
-                    return;
-
-                case "/customers/contracts/new":
-
-                    if (customerId != 0)
-                    {
-                        await ShowNewContract(context, customerId);
-
-                        return;
-                    }
-
-                    await context.Response.WriteAsync("Ошибка в строке запроса");
-                    return;
-
-                default:
-                    break;
-            }
-
-            await Next.Invoke(context);
-        }
-
-        private Task ShowNewContract(HttpContext context, int customerId)
-        {
-            throw new NotImplementedException();
-        }
-
-        private async Task ShowDeleteContract(HttpContext context, int customerId, int contractId)
-        {
-            await context.Response.WriteAsync("Редактирование договора с id = " + contractId + ", клиента с id = " + customerId);
-        }
-
-        private async Task ShowListContracts(HttpContext context, int id)
-        {
-            await context.Response.WriteAsync("Список договоров");
-        }
+        //protected override async Task ShowNewEntity(HttpContext context, int customerId)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

@@ -15,101 +15,70 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data
 {
-    public class CustomersMiddleware
+    public class CustomersMiddleware: AbstractCustomersMiddlware
     {
-        private RequestDelegate Next { get; }
+        protected override string TableName { get => "Customers"; }
 
-        private readonly StorageDatabase storage;
+        protected override string EntityName { get => "customer"; }
 
-        private readonly string contextMenu = "" +
-@"<nav class='context-menu' id='context-menu'>
-  <ul class='context-menu__items'>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='contracts'>
-        <i class='fa fa-eye'></i>Договоры
-      </a>
-    </li>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='income'>
-        <i class='fa fa-edit'></i>Оплата договоров
-      </a>
-    </li>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='edit'>
-        <i class='fa fa-times'></i>Просмотр и редактирование
-      </a>
-    </li>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='delete'>
-        <i class='fa fa-times'></i>Удалить
-      </a>
-    </li>
-  </ul>
-</nav>";
+        protected override string ListEntities { get => "/customers"; }
 
-        public CustomersMiddleware(RequestDelegate next, StorageDatabase storage)
+        protected override string EditEntity { get => "/customers/edit"; }
+
+        protected override string DeleteEntity { get => "/customers/delete"; }
+
+        protected override string NewEntity { get => "/customers/new"; }
+
+        public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
-            Next = next;
-
-            this.storage = storage;
         }
 
-        public async Task InvokeAsync(HttpContext context)
-        {
-            var path = context.Request.Path.Value.ToLower();
-            
-            string customer_Id = context.Request.Query["customer"];
-            
-            if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
-            {
-                customerId = 0;
-            }
+        //public override async Task InvokeAsync(HttpContext context)
+        //{
+        //    var path = context.Request.Path.Value.ToLower();
 
-            switch (path)
-            {
-                case "/customers":
-                    await ShowListCustomers(context);
-                    break;
+        //    string customer_Id = context.Request.Query[EntityName];
 
-                case "/customers/edit":
-                    if (customerId != 0)
-                    {
-                        await ShowEditCustomer(context, customerId);
-                    }
-                    break;
+        //    if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
+        //    {
+        //        customerId = 0;
+        //    }
 
-                case "/customers/delete":
-                    if (customerId != 0)
-                    {
-                        await ShowDeleteCustomer(context, customerId);
-                    }
+        //    switch (path)
+        //    {
+        //        case "/customers":
+        //            await ShowListCustomers(context);
+        //            break;
 
-                    break;
+        //        case "/customers/edit":
+        //            if (customerId != 0)
+        //            {
+        //                await ShowEditCustomer(context, customerId);
+        //            }
+        //            break;
 
-                case "/customers/new":
-                    if (customerId != 0)
-                    {
-                        await ShowNewCustomer(context);
-                    }
+        //        case "/customers/delete":
+        //            if (customerId != 0)
+        //            {
+        //                await ShowDeleteCustomer(context, customerId);
+        //            }
 
-                    break;
+        //            break;
 
-                default:
+        //        case "/customers/new":
+        //            if (customerId != 0)
+        //            {
+        //                await ShowNewCustomer(context);
+        //            }
 
-                    await Next.Invoke(context);
-                    break;
-            }
-        }
+        //            break;
 
-        private Task ShowNewCustomer(HttpContext context)
-        {
-            throw new NotImplementedException();
-        }
+        //        default:
 
-        private Task ShowDeleteCustomer(HttpContext context, int customerId)
-        {
-            throw new NotImplementedException();
-        }
+        //            await Next.Invoke(context);
+        //            break;
+        //    }
+        //}
 
 
         /// <summary>
@@ -117,10 +86,8 @@ namespace WebApplication1.Data
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public async Task ShowListCustomers(HttpContext context)
+        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
         {
-
-
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
             response.Append("<main>")
@@ -135,7 +102,7 @@ namespace WebApplication1.Data
 
             try
             {
-                dataViewTable = storage["Customers"].DefaultView;
+                dataViewTable = Storage[TableName].DefaultView;
             }
             catch (SqliteException ex)
             {
@@ -143,7 +110,7 @@ namespace WebApplication1.Data
 
                 await context.Response.WriteAsync(response.ToString());
 
-                return;
+                return true;
             }
 
             dataViewTable.Sort = "NameCompany";
@@ -159,11 +126,13 @@ namespace WebApplication1.Data
             }
 
             response.Append("</tbody></table></div></main>")
-                    .Append(contextMenu)
+                    .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
                     .Append("<script src='js\\HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
 
             await context.Response.WriteAsync(response.ToString());
+
+            return true;
         }
 
 
@@ -174,9 +143,9 @@ namespace WebApplication1.Data
         /// <param name="context"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task ShowEditCustomer(HttpContext context, int id)
+        protected override async Task ShowEditEntity(HttpContext context, int customerId, int? entityId)
         {
-            DataRow row = storage["Customers", $"SELECT * FROM Customers WHERE Id='{id}'"].Rows[0];
+            DataRow row = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"].Rows[0];
 
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                                        "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
@@ -208,5 +177,14 @@ namespace WebApplication1.Data
             await context.Response.WriteAsync(response.ToString());
         }
 
+        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? incomeId)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        //protected override async Task ShowNewEntity(HttpContext context, int customerId)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
