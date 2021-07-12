@@ -3,11 +3,12 @@ using StorageDatabaseNameSpace;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace WebApplication1
 {
-    public class AbstractCustomersMiddlware
+    public abstract class AbstractCustomersMiddlware
     {
         protected virtual string TableName { get; }
 
@@ -23,32 +24,20 @@ namespace WebApplication1
 
         protected virtual string CustomerEntityName { get => "customer"; }
 
-        protected virtual string ContextMenu { get => "" +
+        private const string contextMenuBegin =
 @"<nav class='context-menu' id='context-menu'>
-  <ul class='context-menu__items'>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='contracts'>
-        <i class='fa fa-eye'></i>Договоры
-      </a>
-    </li>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='income'>
-        <i class='fa fa-edit'></i>Оплата договоров
-      </a>
-    </li>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='edit'>
-        <i class='fa fa-times'></i>Просмотр и редактирование
-      </a>
-    </li>
-    <li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='delete'>
-        <i class='fa fa-times'></i>Удалить
-      </a>
-    </li>
-  </ul>
-</nav>"; }
+  <ul class='context-menu__items'>";
 
+        private const string contextMenuItem =
+@"<li class='context-menu__item'>
+      <a href = '#' class='context-menu__link' data-action='{0}'>{1}</a>
+    </li>";
+
+        private const string contextMenuEnd =
+@"  </ul>
+</nav>";
+
+        protected abstract string ContextMenu { get; }
 
         protected RequestDelegate Next { get; }
 
@@ -63,6 +52,35 @@ namespace WebApplication1
             Storage = storage;
         }
 
+        /// <summary>
+        /// Класс, реализующий создание контекстного меню.
+        /// </summary>
+        protected class ContextMenuString
+        {
+            private readonly StringBuilder menu;
+
+            private ContextMenuString()
+            {
+                menu = new(contextMenuBegin);
+            }
+
+            public static ContextMenuString GetBuilder() => new();
+
+            public ContextMenuString Append(string dataAction, string itemContent)
+            {
+                menu.Append(string.Format(contextMenuItem, dataAction, itemContent));
+
+                return this;
+            }
+
+            public string GetContextMenuString() => menu.Append(contextMenuEnd).ToString();
+        }
+
+        /// <summary>
+        /// Обработчик компонента Middleware.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public virtual async Task InvokeAsync(HttpContext context)
         {
             string path = context.Request.Path.Value.ToLower();
@@ -76,6 +94,10 @@ namespace WebApplication1
             if (EntityName != null)
             {
                 entity_Id = context.Request.Query[EntityName];
+                if (context.Request.Method == "POST")
+                {
+                    customer_Id = context.Request.Form.FirstOrDefault(p => p.Key == "Id").Value;
+                }
             }
 
             if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
@@ -134,6 +156,21 @@ namespace WebApplication1
 
                 error = true;
             }
+            else if (path.EndsWith("submit") == true)
+            {
+                //if (customerId != 0)
+                //{
+                customer_Id = context.Request.Form.FirstOrDefault(p => p.Key == "Id").Value;
+
+
+                
+                await ProcessRequest(context, customerId);
+
+                    return;
+                //}
+
+                error = true;
+            }
 
             if (error)
             {
@@ -144,27 +181,57 @@ namespace WebApplication1
             await Next.Invoke(context);
         }
 
+        /// <summary>
+        /// Отображает на странице список сущностей.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
         protected virtual async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
         {
             await context.Response.WriteAsync("Список сущностей");
 
-            return true;
+            return false;
         }
 
+        /// <summary>
+        /// Редактирование сущности.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="customerId"></param>
+        /// <param name="entityId"></param>
+        /// <returns></returns>
         protected virtual async Task ShowEditEntity(HttpContext context, int customerId, int? entityId)
         {
             await context.Response.WriteAsync("Редактирование сущности с id = " + entityId + ", клиента с id = " + customerId);
         }
 
+        /// <summary>
+        /// Удаление сущности.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="customerId"></param>
+        /// <param name="entityId"></param>
+        /// <returns></returns>
         protected virtual async Task ShowDeleteEntity(HttpContext context, int customerId, int? entityId)
         {
             await context.Response.WriteAsync("Удаление сущности с id = " + entityId + ", клиента с id = " + customerId);
         }
 
+        /// <summary>
+        /// Добавляет новую сущность.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
         protected virtual async Task ShowNewEntity(HttpContext context, int customerId)
         {
             await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId);
         }
 
+        protected virtual async Task ProcessRequest(HttpContext context, int customerId)
+        {
+            await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId);
+        }
     }
 }

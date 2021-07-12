@@ -102,8 +102,22 @@ document.querySelector('table').onclick = function (event) {
     var i = cell.parentNode.rowIndex;
     var j = cell.cellIndex;
     var currentTr = cell.parentNode;
-    window.location.href = "customers/edit?customer=" + currentTr.id;
+    var action = "edit";
+    var paramName = currentTr.closest('table').getAttribute("data-parameter");
+    window.location.href = createPathWithNewParameter(action, paramName, currentTr.id);
 };
+// Извлечение первого параметра из URL
+function createPathWithNewParameter(action, param, value) {
+    var url = new URL(window.location.href);
+    var params = url.search;
+    if (params === "" || params === null || params === undefined) {
+        params = "?";
+    }
+    else {
+        params += "&";
+    }
+    return url.pathname.concat("/", action, params, param + "=" + value);
+}
 function resizebody() {
     var container = document.getElementById("divTable");
     var titleTable = document.getElementById("titleTable");
@@ -200,9 +214,10 @@ var contextMenuActive = "context-menu--active";
     }
     function menuItemListener(link) {
         var currentTr = taskItemInContext;
-        var action = "customers/" + link.getAttribute("data-action") + "?" + "customer=" + currentTr.id;
-        window.location.href = action;
-        console.log("Task ID - " + currentTr.id + "Task action - " + link.getAttribute("data-action"));
+        var action = currentTr.getAttribute("data-action");
+        var paramName = currentTr.closest("table").getAttribute("data-parameter");
+        var path = createPathWithNewParameter(link.getAttribute("data-action"), paramName, currentTr.id);
+        window.location.href = path;
         toggleMenuOff();
     }
     // Обработчик нажатия клавиши на клавиатуре.

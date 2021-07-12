@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data
 {
-    public class CustomersMiddleware: AbstractCustomersMiddlware
+    public class CustomersMiddleware : AbstractCustomersMiddlware
     {
         protected override string TableName { get => "Customers"; }
 
@@ -29,57 +29,18 @@ namespace WebApplication1.Data
 
         protected override string NewEntity { get => "/customers/new"; }
 
+        protected override string ContextMenu { get; }
+
         public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
+            ContextMenu = ContextMenuString.GetBuilder()
+                .Append("edit", "Просмотр и редактирование")
+                .Append("contracts", "Список договоров")
+                .Append("income", "Оплата договоров")
+                .Append("new", "Добавить нового клиента")
+                .Append("delete", "Удалить клиента")
+                .GetContextMenuString();
         }
-
-        //public override async Task InvokeAsync(HttpContext context)
-        //{
-        //    var path = context.Request.Path.Value.ToLower();
-
-        //    string customer_Id = context.Request.Query[EntityName];
-
-        //    if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
-        //    {
-        //        customerId = 0;
-        //    }
-
-        //    switch (path)
-        //    {
-        //        case "/customers":
-        //            await ShowListCustomers(context);
-        //            break;
-
-        //        case "/customers/edit":
-        //            if (customerId != 0)
-        //            {
-        //                await ShowEditCustomer(context, customerId);
-        //            }
-        //            break;
-
-        //        case "/customers/delete":
-        //            if (customerId != 0)
-        //            {
-        //                await ShowDeleteCustomer(context, customerId);
-        //            }
-
-        //            break;
-
-        //        case "/customers/new":
-        //            if (customerId != 0)
-        //            {
-        //                await ShowNewCustomer(context);
-        //            }
-
-        //            break;
-
-        //        default:
-
-        //            await Next.Invoke(context);
-        //            break;
-        //    }
-        //}
-
 
         /// <summary>
         /// Отображает список клиентов.
@@ -93,7 +54,7 @@ namespace WebApplication1.Data
             response.Append("<main>")
                     .Append("<div id='titleTable'><h1 id='h1ListCustomers'>Список клиентов</h1></div>")
                     .Append("<div style='overflow-y:auto' id='divTable'>")
-                    .Append("<table id='list-customers'><thead><tr>")
+                    .Append("<table id='list-customers' data-parameter='customer'><thead><tr>")
                     .Append("<th data-sort-order='ascending'>УНП</th>")
                     .Append("<th data-sort-order='ascending'>Название организации</th>")
                     .Append("</tr></thead><tbody>");
@@ -132,7 +93,7 @@ namespace WebApplication1.Data
 
             await context.Response.WriteAsync(response.ToString());
 
-            return true;
+            return false;
         }
 
 
@@ -158,18 +119,45 @@ namespace WebApplication1.Data
             else
             {
                 response.Append($"<main><h1>{row["NameCompany"]}</h1>")
-                        .Append("<table>")
-                        .Append("<tbody>")
-                        .Append($"<tr><td>УНП</td><td>{row["UNP"]}</td></tr>")
-                        .Append($"<tr><td>Расчётный счёт</td><td>{row["account"]}</td></tr>")
-                        .Append($"<tr><td>Город</td><td>{row["city"]}</td></tr>")
-                        .Append($"<tr><td>Дополнительный расчётный счёт</td><td>{row["account1"]}</td></tr>")
-                        .Append($"<tr><td>Область</td><td>{row["region"]}</td></tr>")
-                        .Append($"<tr><td>Номер телефона</td><td>{row["phoneNumber"]}</td></tr>")
-                        .Append($"<tr><td>Факс</td><td>{row["fax"]}</td></tr>")
-                        .Append($"<tr><td>Электронная почта</td><td>{row["mail"]}</td></tr>")
-                        .Append($"<tr><td>Файл с дополнительной информацией</td><td>{row["file"]}</td></tr>")
-                        .Append("</table>")
+                        .Append($"<form method='post' action='{EditEntity}/submit'>")
+                        .Append($"<input type='hidden' name='Id' value='{row["Id"]}'/>")
+
+                        .Append("<table><tbody>")
+                        .Append($"<tr><td><label>Название организации</label></td>")
+                        .Append($"<td><input name='NameCompany' value='{row["NameCompany"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>УНП</label></td>")
+                        .Append($"<td><input name='UNP' value='{row["UNP"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Расчётный счёт</label></td>")
+                        .Append($"<td><input name='account' value='{row["account"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Город</label></td>")
+                        .Append($"<td><input name='city' value='{row["city"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Дополнительный расчётный счёт</label></td>")
+                        .Append($"<td><input name='account1' value='{row["account1"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Район</label></td>")
+                        .Append($"<td><input name='region' value='{row["region"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Номер телефона</label></td>")
+                        .Append($"<td><input name='phoneNumber' value='{row["phoneNumber"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Номер факса</label></td>")
+                        .Append($"<td><input name='fax' value='{row["fax"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Электронная почта</label></td>")
+                        .Append($"<td><input name='mail' value='{row["mail"]}'/></td></tr>")
+
+                        .Append($"<tr><td><label>Файл с дополнительной информацией</label></td>")
+                        .Append($"<td><input name='file' value='{row["file"]}'/></td></tr>")
+                        .Append("</tbody></table>")
+
+                        .Append("<p><input type='submit' value='Отправить'>")
+                        .Append("<input type='reset' value='Очистить'></p>")
+
+                        .Append("</form>")
                         .Append("</main>")
                         .Append(Startup.EndHtmlPages + "</html>");
             }
@@ -186,5 +174,13 @@ namespace WebApplication1.Data
         //{
         //    throw new NotImplementedException();
         //}
+
+        protected override async Task ProcessRequest(HttpContext context, int customerId)
+        {
+
+
+
+            await context.Response.WriteAsync("Данные обновлены для киента с id = " + customerId);
+        }
     }
 }

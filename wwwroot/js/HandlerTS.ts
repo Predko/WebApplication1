@@ -130,8 +130,30 @@ document.querySelector('table').onclick = (event) => {
     let i: number = (cell.parentNode as HTMLTableRowElement).rowIndex;
     let j: number = cell.cellIndex;
     let currentTr: HTMLTableRowElement = cell.parentNode as HTMLTableRowElement;
-    window.location.href = "customers/edit?customer=" + currentTr.id;
+
+    const action = "edit";
+    const paramName = currentTr.closest('table').getAttribute("data-parameter");
+
+    window.location.href = createPathWithNewParameter(action, paramName, currentTr.id);
 }
+
+// Извлечение первого параметра из URL
+function createPathWithNewParameter(action:string, param:string, value:string): string
+{
+    const url = new URL(window.location.href);
+    let params = url.search;
+
+    if (params === "" || params === null || params === undefined) {
+
+        params = "?";
+    }
+    else {
+        params += "&";
+    }
+
+    return url.pathname.concat("/", action, params, `${param}=${value}`);
+}
+
 
 function resizebody() {
     let container = document.getElementById("divTable");
@@ -282,11 +304,13 @@ const contextMenuActive = "context-menu--active";
     function menuItemListener(link)
     {
         const currentTr: HTMLTableRowElement = taskItemInContext as HTMLTableRowElement;
-        const action = "customers/" + link.getAttribute("data-action") + "?" + "customer=" + currentTr.id;
 
-        window.location.href = action;
+        const action = currentTr.getAttribute("data-action");
+        const paramName = currentTr.closest("table").getAttribute("data-parameter");
 
-        console.log("Task ID - " + currentTr.id + "Task action - " + link.getAttribute("data-action"));
+        const path = createPathWithNewParameter(link.getAttribute("data-action"), paramName, currentTr.id);
+
+        window.location.href = path;
 
         toggleMenuOff();
     }

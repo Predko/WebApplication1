@@ -21,8 +21,15 @@ namespace WebApplication1.Data
 
         protected override string NewEntity { get => "/customers/income/new"; }
 
+        protected override string ContextMenu { get; }
+
         public IncomeMiddleware(RequestDelegate next, StorageDatabase storage): base(next, storage)
         {
+            ContextMenu = ContextMenuString.GetBuilder()
+                .Append("edit", "Просмотр и редактирование")
+                .Append("new", "Добавить новое поступление")
+                .Append("delete", "Удалить запись")
+                .GetContextMenuString();
         }
 
         //protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
