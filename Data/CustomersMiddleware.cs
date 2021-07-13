@@ -31,7 +31,23 @@ namespace WebApplication1.Data
 
         protected override string ContextMenu { get; }
 
-        public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
+        private readonly string[] columnNames =
+        {
+            "Идентификатор",
+            "Название организации",
+            "Расчётный счёт",
+            "Город",
+            "Дополнительный расчётный счёт",
+            "Район",
+            "Номер телефона",
+            "Номер факса",
+            "Электронная почта",
+            "Файл с дополнительной информацией",
+            "УНП"
+        };
+
+
+    public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
             ContextMenu = ContextMenuString.GetBuilder()
                 .Append("edit", "Просмотр и редактирование")
@@ -46,8 +62,8 @@ namespace WebApplication1.Data
         /// Отображает список клиентов.
         /// </summary>
         /// <param name="context"></param>
-        /// <returns></returns>
-        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
+        /// <returns>false if an error is occured, otherwise - true</returns>
+        protected override async Task<bool> ShowListOfEntities(HttpContext context, int p1, int p2)
         {
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
@@ -93,7 +109,7 @@ namespace WebApplication1.Data
 
             await context.Response.WriteAsync(response.ToString());
 
-            return false;
+            return true;
         }
 
 
@@ -103,10 +119,11 @@ namespace WebApplication1.Data
         /// </summary>
         /// <param name="context"></param>
         /// <param name="id"></param>
-        /// <returns></returns>
-        protected override async Task ShowEditEntity(HttpContext context, int customerId, int? entityId)
+        /// <returns>False if an error is occured, otherwise - true</returns>
+        protected override async Task<bool> ShowEditEntity(HttpContext context, int customerId, int entityId)
         {
-            DataRow row = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"].Rows[0];
+            DataTable dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
+            DataRow row = dataTable.Rows[0];
 
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                                        "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
@@ -118,41 +135,21 @@ namespace WebApplication1.Data
             }
             else
             {
-                response.Append($"<main><h1>{row["NameCompany"]}</h1>")
+                response.Append($"<main><h1>Подробные данные клиента</h1>")
                         .Append($"<form method='post' action='{EditEntity}/submit'>")
-                        .Append($"<input type='hidden' name='Id' value='{row["Id"]}'/>")
+                        .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}'/>")
 
-                        .Append("<table><tbody>")
-                        .Append($"<tr><td><label>Название организации</label></td>")
-                        .Append($"<td><input name='NameCompany' value='{row["NameCompany"]}'/></td></tr>")
+                        .Append("<table><tbody>");
 
-                        .Append($"<tr><td><label>УНП</label></td>")
-                        .Append($"<td><input name='UNP' value='{row["UNP"]}'/></td></tr>")
+                var columns = dataTable.Columns;
 
-                        .Append($"<tr><td><label>Расчётный счёт</label></td>")
-                        .Append($"<td><input name='account' value='{row["account"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Город</label></td>")
-                        .Append($"<td><input name='city' value='{row["city"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Дополнительный расчётный счёт</label></td>")
-                        .Append($"<td><input name='account1' value='{row["account1"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Район</label></td>")
-                        .Append($"<td><input name='region' value='{row["region"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Номер телефона</label></td>")
-                        .Append($"<td><input name='phoneNumber' value='{row["phoneNumber"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Номер факса</label></td>")
-                        .Append($"<td><input name='fax' value='{row["fax"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Электронная почта</label></td>")
-                        .Append($"<td><input name='mail' value='{row["mail"]}'/></td></tr>")
-
-                        .Append($"<tr><td><label>Файл с дополнительной информацией</label></td>")
-                        .Append($"<td><input name='file' value='{row["file"]}'/></td></tr>")
-                        .Append("</tbody></table>")
+                for ( int i = 1; i != row.ItemArray.Count(); i++)
+                {
+                    response.Append($"<tr><td><label>{columnNames[i]}</label></td>")
+                            .Append($"<td><input name='{columns[i].ColumnName}' value='{row[i]}'/></td></tr>");
+                }
+                
+                response.Append("</tbody></table>")
 
                         .Append("<p><input type='submit' value='Отправить'>")
                         .Append("<input type='reset' value='Очистить'></p>")
@@ -163,24 +160,83 @@ namespace WebApplication1.Data
             }
 
             await context.Response.WriteAsync(response.ToString());
+
+            return true;
         }
 
-        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? incomeId)
+        //protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int incomeId)
         //{
         //    throw new NotImplementedException();
         //}
 
-        //protected override async Task ShowNewEntity(HttpContext context, int customerId)
+        //protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)
         //{
         //    throw new NotImplementedException();
         //}
 
-        protected override async Task ProcessRequest(HttpContext context, int customerId)
+        protected override async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int p2)
         {
+            if (customerId == -1)
+            {
+                await context.Response.WriteAsync("Ошибка запроса. Отсутствует Id клиента");
 
+                return true;
+            }
 
+            
+            var formValues = context.Request.Form.Select(e => e.Value).ToArray();
 
-            await context.Response.WriteAsync("Данные обновлены для киента с id = " + customerId);
+            DataTable dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
+            DataRow row = dataTable.Rows[0];
+
+            row.BeginEdit();
+
+            for (int i = 1; i != row.ItemArray.Count(); i++)
+            {
+                Type t = row.ItemArray[i].GetType();
+
+                row[i] = SetRowValueFromString(row.ItemArray[i].GetType(), formValues[i]);
+            }
+
+            row.EndEdit();
+
+            Storage.UpdateDataTable("Customers");
+
+            await context.Response.WriteAsync("Данные обновлены для клиента с id = " + customerId);
+
+            return true;
+        }
+
+        private object SetRowValueFromString(Type type, string value)
+        {
+            if (type == typeof(int))
+            {
+                bool err = !int.TryParse(value, out int intValue);
+
+                return (err) ? intValue : null;
+            }
+            else if (type == typeof(long))
+            {
+                bool err = !long.TryParse(value, out long longValue);
+
+                return (err) ? longValue : null;
+            }
+            else if (type == typeof(double))
+            {
+                bool err = !double.TryParse(value, out double doubleValue);
+
+                return (err) ? doubleValue : null;
+            }
+            else if (type == typeof(bool))
+            {
+                return value.Contains("1");
+            }
+            else if (type == typeof(string))
+            {
+                return value;
+            }
+
+            return null;
         }
     }
 }

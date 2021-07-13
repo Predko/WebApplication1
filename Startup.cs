@@ -46,8 +46,7 @@ namespace WebApplication1
         public static readonly string EndHtmlPages =
 @"    <footer id=""footer_body"">
     </footer>
-</body>
-";
+</body>";
 
         private StorageDatabase storage;
 

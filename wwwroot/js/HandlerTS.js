@@ -106,7 +106,7 @@ document.querySelector('table').onclick = function (event) {
     var paramName = currentTr.closest('table').getAttribute("data-parameter");
     window.location.href = createPathWithNewParameter(action, paramName, currentTr.id);
 };
-// Извлечение первого параметра из URL
+// Создание адреса с параметрами.
 function createPathWithNewParameter(action, param, value) {
     var url = new URL(window.location.href);
     var params = url.search;

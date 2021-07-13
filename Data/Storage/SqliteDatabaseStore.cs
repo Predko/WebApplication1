@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace StorageDatabaseNameSpace
 {
@@ -16,17 +17,17 @@ namespace StorageDatabaseNameSpace
         /// </summary>
         /// <param name="connectionString">Строка подключения к базе данных.</param>
         public SqliteDatabaseStore(string connectionString) : base(connectionString) { }
-        
+
         public override int UpdateDataTable(string nameTable, string queryString = null)
         {
             DataTable dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Added);
-
-            ColumnsAndValuesInfo columnsAndValues = new(dt);
 
             int count = 0;
 
             if (dt != null)
             {
+                ColumnsAndValuesInfo columnsAndValues = new(dt);
+
                 dt.TableName = nameTable;
                 count = ExecuteInsertCommand(dt, columnsAndValues);
             }
@@ -35,6 +36,8 @@ namespace StorageDatabaseNameSpace
 
             if (dt != null)
             {
+                ColumnsAndValuesInfo columnsAndValues = new(dt);
+
                 dt.TableName = nameTable;
                 count = ExecuteUpdateCommand(dt, columnsAndValues);
             }
@@ -43,6 +46,8 @@ namespace StorageDatabaseNameSpace
 
             if (dt != null)
             {
+                ColumnsAndValuesInfo columnsAndValues = new(dt);
+
                 dt.TableName = nameTable;
                 count = ExecuteDeleteCommand(dt, columnsAndValues);
             }
@@ -90,7 +95,8 @@ namespace StorageDatabaseNameSpace
 
             foreach (DataRow row in dt.Rows)
             {
-                command.CommandText = string.Format(commandString, columnsAndValues.ValuesNotPrimaryKey(row), columnsAndValues.PrimaryKeyValues(row));
+                var parameters = columnsAndValues.ValuesNotPrimaryKey(row).Concat(columnsAndValues.PrimaryKeyValues(row)).ToArray();
+                command.CommandText = string.Format(commandString, parameters);
 
                 count += command.ExecuteNonQuery();
             }
@@ -141,7 +147,7 @@ namespace StorageDatabaseNameSpace
 
             for (int i = 0; i != columnsAndValues.Count; i++)
             {
-                lc.Append($"'{i},");
+                lc.Append($"'{{{i}}},");
             }
 
             // Remove last 'AND'
@@ -159,9 +165,9 @@ namespace StorageDatabaseNameSpace
             string[] columns = columnsAndValues.ColumnsNotPrimaryKey;
 
             int indexValue;
-            for (indexValue = 0; indexValue != columnsAndValues.Count; indexValue++)
+            for (indexValue = 0; indexValue != columnsAndValues.ColumnsNotPrimaryKey.Length; indexValue++)
             {
-                lc.Append(columns[indexValue]).Append($"={indexValue},\n");
+                lc.Append(columns[indexValue]).Append($"='{{{indexValue}}}',\n");
             }
 
             lc.Remove(lc.Length - 2, 1);
@@ -170,7 +176,7 @@ namespace StorageDatabaseNameSpace
 
             foreach (string column in columnsAndValues.PrimaryKeyColumns)
             {
-                lc.Append(column).Append($"='{indexValue++}'").Append("\n AND ");
+                lc.Append(column).Append($"='{{{indexValue++}}}'").Append("\n AND ");
             }
 
             // Remove last 'AND'
@@ -186,7 +192,7 @@ namespace StorageDatabaseNameSpace
             int indexValue = 0;
             foreach (string column in columnsAndValues.PrimaryKeyColumns)
             {
-                lc.Append(column).Append($"='{indexValue++}'").Append("\n AND ");
+                lc.Append(column).Append($"='{{{indexValue++}}}'").Append("\n AND ");
             }
 
             // Remove last 'AND'
@@ -266,6 +272,8 @@ namespace StorageDatabaseNameSpace
 
                 connection.Close();
             }
+
+            dt.AcceptChanges();
 
             return count;
         }

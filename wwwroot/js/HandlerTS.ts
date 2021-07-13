@@ -137,7 +137,7 @@ document.querySelector('table').onclick = (event) => {
     window.location.href = createPathWithNewParameter(action, paramName, currentTr.id);
 }
 
-// Извлечение первого параметра из URL
+// Создание адреса с параметрами.
 function createPathWithNewParameter(action:string, param:string, value:string): string
 {
     const url = new URL(window.location.href);

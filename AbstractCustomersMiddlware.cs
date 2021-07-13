@@ -24,6 +24,9 @@ namespace WebApplication1
 
         protected virtual string CustomerEntityName { get => "customer"; }
 
+        // For "POST" method, entity Id name = CustomerEntityName + "Id" and EntityName + "Id" respectively.
+        // for "GET" method - CustomerEntityName and EntityName.
+
         private const string contextMenuBegin =
 @"<nav class='context-menu' id='context-menu'>
   <ul class='context-menu__items'>";
@@ -76,6 +79,8 @@ namespace WebApplication1
             public string GetContextMenuString() => menu.Append(contextMenuEnd).ToString();
         }
 
+        private delegate Task<bool> ShowDelegate(HttpContext context, int entityParent, int entityChild);
+
         /// <summary>
         /// Обработчик компонента Middleware.
         /// </summary>
@@ -83,99 +88,74 @@ namespace WebApplication1
         /// <returns></returns>
         public virtual async Task InvokeAsync(HttpContext context)
         {
+            ShowDelegate ShowPage = null;
+
             string path = context.Request.Path.Value.ToLower();
 
+            if (path == ListEntities)
+            {
+                ShowPage = ShowListOfEntities;
+            }
+            else if (path == EditEntity)
+            {
+                ShowPage = ShowEditEntity;
+            }
+            else if (path == DeleteEntity)
+            {
+                ShowPage = ShowDeleteEntity;
+            }
+            else if (path == NewEntity)
+            {
+                ShowPage = ShowNewEntity;
+            }
+            else if (path.EndsWith("submit") == true)
+            {
+                ShowPage = ProcessFormRequest;
+            }
+
+            // For "POST" method, entity Id name = CustomerEntityName + "Id" and EntityName + "Id" respectively.
+            // for "GET" method - CustomerEntityName and EntityName.
+            string GetParameter(string nameParam) => (context.Request.Method == "GET") ? context.Request.Query[nameParam]
+                                                                                       : context.Request.Form[nameParam + "Id"];
+            //-------
+            
             context.Response.ContentType = "text/html;charset=utf-8";
 
-            string customer_Id = context.Request.Query[CustomerEntityName];
-
-            string entity_Id = "";
-
-            if (EntityName != null)
-            {
-                entity_Id = context.Request.Query[EntityName];
-                if (context.Request.Method == "POST")
-                {
-                    customer_Id = context.Request.Form.FirstOrDefault(p => p.Key == "Id").Value;
-                }
-            }
+            string customer_Id = GetParameter(CustomerEntityName);
 
             if (string.IsNullOrWhiteSpace(customer_Id) == true || int.TryParse(customer_Id, out int customerId) == false)
             {
-                customerId = 0;
+                customerId = -1;
             }
 
-            int? entityId = null;
+            string entity_Id;
 
-            if (string.IsNullOrWhiteSpace(entity_Id) == false && int.TryParse(entity_Id, out int id) == true)
+            if (EntityName != null)
             {
-                entityId = id;
+                entity_Id = GetParameter(EntityName);
+            }
+            else
+            {
+                entity_Id = "";
+            }
+
+            if (string.IsNullOrWhiteSpace(entity_Id) == true || int.TryParse(entity_Id, out int entityId) == false)
+            {
+                entityId = -1;
             }
 
             bool error = false;
 
-            if (path == ListEntities)
+            if (ShowPage != null)
             {
-                error = await ShowListOfEntities(context, customerId);
-
-                if (!error)
-                {
-                    return;
-                }
-            }
-            else if (path == EditEntity)
-            {
-                if (customerId != 0)
-                {
-                    await ShowEditEntity(context, customerId, entityId);
-
-                    return;
-                }
-
-                error = true;
-            }
-            else if (path == DeleteEntity)
-            {
-                if (customerId != 0)
-                {
-                    await ShowDeleteEntity(context, customerId, entityId);
-
-                    return;
-                }
-
-                error = true;
-            }
-            else if (path == NewEntity)
-            {
-                if (customerId != 0)
-                {
-                    await ShowNewEntity(context, customerId);
-
-                    return;
-                }
-
-                error = true;
-            }
-            else if (path.EndsWith("submit") == true)
-            {
-                //if (customerId != 0)
-                //{
-                customer_Id = context.Request.Form.FirstOrDefault(p => p.Key == "Id").Value;
-
-
+                await ShowPage(context, customerId, entityId);
                 
-                await ProcessRequest(context, customerId);
-
+                if (error)
+                {
+                    await context.Response.WriteAsync(RequestFailed);
+                    
                     return;
-                //}
-
-                error = true;
-            }
-
-            if (error)
-            {
-                await context.Response.WriteAsync(RequestFailed);
-                return;
+                }
             }
 
             await Next.Invoke(context);
@@ -186,12 +166,12 @@ namespace WebApplication1
         /// </summary>
         /// <param name="context"></param>
         /// <param name="customerId"></param>
-        /// <returns></returns>
-        protected virtual async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
+        /// <returns>False if an error is occured, otherwise - true</returns>
+        protected virtual async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int p2)
         {
             await context.Response.WriteAsync("Список сущностей");
 
-            return false;
+            return true;
         }
 
         /// <summary>
@@ -200,10 +180,12 @@ namespace WebApplication1
         /// <param name="context"></param>
         /// <param name="customerId"></param>
         /// <param name="entityId"></param>
-        /// <returns></returns>
-        protected virtual async Task ShowEditEntity(HttpContext context, int customerId, int? entityId)
+        /// <returns>False if an error is occured, otherwise - true</returns>
+        protected virtual async Task<bool> ShowEditEntity(HttpContext context, int customerId, int entityId)
         {
             await context.Response.WriteAsync("Редактирование сущности с id = " + entityId + ", клиента с id = " + customerId);
+
+            return true;
         }
 
         /// <summary>
@@ -212,10 +194,12 @@ namespace WebApplication1
         /// <param name="context"></param>
         /// <param name="customerId"></param>
         /// <param name="entityId"></param>
-        /// <returns></returns>
-        protected virtual async Task ShowDeleteEntity(HttpContext context, int customerId, int? entityId)
+        /// <returns>False if an error is occured, otherwise - true</returns>
+        protected virtual async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int entityId)
         {
             await context.Response.WriteAsync("Удаление сущности с id = " + entityId + ", клиента с id = " + customerId);
+
+            return true;
         }
 
         /// <summary>
@@ -223,15 +207,26 @@ namespace WebApplication1
         /// </summary>
         /// <param name="context"></param>
         /// <param name="customerId"></param>
-        /// <returns></returns>
-        protected virtual async Task ShowNewEntity(HttpContext context, int customerId)
+        /// <returns>False if an error is occured, otherwise - true</returns>
+        protected virtual async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)
         {
             await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId);
+
+            return true;
         }
 
-        protected virtual async Task ProcessRequest(HttpContext context, int customerId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="customerId"></param>
+        /// <param name="p2"></param>
+        /// <returns>False if an error is occured, otherwise - true</returns>
+        protected virtual async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int p2)
         {
-            await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId);
+            await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId + " создана.");
+
+            return true;
         }
     }
 }

@@ -32,17 +32,17 @@ namespace WebApplication1.Data
                 .GetContextMenuString();
         }
 
-        //protected override async Task<bool> ShowListOfEntities(HttpContext context, int id)
+        //protected override async Task<bool> ShowListOfEntities(HttpContext context, int id, int p2)
         //{
         //    await context.Response.WriteAsync("Список договоров"); return true;
         //}
 
-        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? contractId)
+        //protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int contractId)
         //{
         //    await context.Response.WriteAsync("Редактирование договора с id = " + contractId + ", клиента с id = " + customerId);
         //}
 
-        //protected override async Task ShowNewEntity(HttpContext context, int customerId)
+        //protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)
         //{
         //    throw new NotImplementedException();
         //}
