@@ -1,0 +1,79 @@
+﻿*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+#h1ListCustomers {
+    text-align: center;
+}
+
+#divTable {
+    overflow-y: auto;
+    height: 300px;
+    border: 2px solid black;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 0px solid black;
+}
+
+thead, th {
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky;
+    top: 0px;
+    background-color: lightgray;
+}
+
+th, td {
+    padding: 3px;
+    min-width: 10em;
+}
+
+    th:not(:first-child), td:not(:first-child) {
+        border-left: 1px solid black;
+    }
+
+tr:nth-child(even) {
+    background: #ddd;
+}
+
+tr:nth-child(odd) {
+    background: #eee;
+}
+
+tbody tr:hover {
+    background-color: burlywood;
+}
+
+
+#h1ListCustomers {
+    margin-bottom: 0px;
+    margin-top: 0px;
+}
+
+#titleTable {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+footer {
+    height: 20px;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.context-menu--active {
+    display: block;
+}
