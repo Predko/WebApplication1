@@ -77,6 +77,8 @@ namespace WebApplication1.Data
 
             DataView dataViewTable;
 
+            //context.Response.Headers["Content-Encoding"] = "identity";
+
             try
             {
                 dataViewTable = Storage[TableName].DefaultView;
@@ -127,6 +129,8 @@ namespace WebApplication1.Data
 
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                                        "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
+
+            context.Response.Headers["Content-Encoding"] = "identity";
 
             if (row == null)
             {

@@ -148,14 +148,16 @@ namespace WebApplication1
 
             if (ShowPage != null)
             {
-                await ShowPage(context, customerId, entityId);
+                error = await ShowPage(context, customerId, entityId);
                 
-                if (error)
+                if (!error)
                 {
+                    // была ошибка и она необработана.
+
                     await context.Response.WriteAsync(RequestFailed);
-                    
-                    return;
                 }
+
+                return;
             }
 
             await Next.Invoke(context);
@@ -166,7 +168,7 @@ namespace WebApplication1
         /// </summary>
         /// <param name="context"></param>
         /// <param name="customerId"></param>
-        /// <returns>False if an error is occured, otherwise - true</returns>
+        /// <returns>If an error occurred and it was not handled, otherwise - true</returns>
         protected virtual async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int p2)
         {
             await context.Response.WriteAsync("Список сущностей");
@@ -180,7 +182,7 @@ namespace WebApplication1
         /// <param name="context"></param>
         /// <param name="customerId"></param>
         /// <param name="entityId"></param>
-        /// <returns>False if an error is occured, otherwise - true</returns>
+        /// <returns>If an error occurred and it was not handled, otherwise - true</returns>
         protected virtual async Task<bool> ShowEditEntity(HttpContext context, int customerId, int entityId)
         {
             await context.Response.WriteAsync("Редактирование сущности с id = " + entityId + ", клиента с id = " + customerId);
@@ -194,7 +196,7 @@ namespace WebApplication1
         /// <param name="context"></param>
         /// <param name="customerId"></param>
         /// <param name="entityId"></param>
-        /// <returns>False if an error is occured, otherwise - true</returns>
+        /// <returns>If an error occurred and it was not handled, otherwise - true</returns>
         protected virtual async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int entityId)
         {
             await context.Response.WriteAsync("Удаление сущности с id = " + entityId + ", клиента с id = " + customerId);
@@ -207,7 +209,7 @@ namespace WebApplication1
         /// </summary>
         /// <param name="context"></param>
         /// <param name="customerId"></param>
-        /// <returns>False if an error is occured, otherwise - true</returns>
+        /// <returns>If an error occurred and it was not handled, otherwise - true</returns>
         protected virtual async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)
         {
             await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId);
@@ -221,7 +223,7 @@ namespace WebApplication1
         /// <param name="context"></param>
         /// <param name="customerId"></param>
         /// <param name="p2"></param>
-        /// <returns>False if an error is occured, otherwise - true</returns>
+        /// <returns>If an error occurred and it was not handled, otherwise - true</returns>
         protected virtual async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int p2)
         {
             await context.Response.WriteAsync("Новая сущность для клиента с id = " + customerId + " создана.");

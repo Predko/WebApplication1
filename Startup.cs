@@ -24,27 +24,27 @@ namespace WebApplication1
 
         public static readonly string BeginHtmlPages =
 @"<!DOCTYPE html>
-<html>
+<html lang='ru' xml:lang='ru'>
 <head>
-    <meta charset=""utf-8""/>
+    <meta charset='utf-8'/>
     <title>Main page</title>
-    <link rel =""stylesheet"" href=""/Styles/Site.css""/>
+    <link rel ='stylesheet' href='/Styles/Site.css'/>
     {0}
 </head>
-<body onresize=""resizebody()"" onload=""resizebody()"">
-    <header id=""header_body"">
+<body onresize='resizebody()' onload='resizebody()'>
+    <header id='header_body'>
         <nav>
             <ul>
-                <li class=""menu-item""><a class=""menu-item-link"" href=""/index.html""> Pages </a></li>
-                <li class=""menu-item""><a class=""menu-item-link"" href=""/customers""> Customers </a></li>
-                <li class=""menu-item""><a class=""menu-item-link"" href=""/info""> Info </a></li>
-                <li class=""menu-item""><a class=""menu-item-link"" href=""/disk_D""> disk D</a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/index.html'> Pages </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers'> Customers </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/info'> Info </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/disk_D'> disk D</a></li>
             </ul>
         </nav>
     </header>";
 
         public static readonly string EndHtmlPages =
-@"    <footer id=""footer_body"">
+@"    <footer id='footer_body'>
     </footer>
 </body>";
 
@@ -67,12 +67,14 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || env.IsProduction())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
             }
 
+            //app.UseSession();
+            
             app.UseDefaultFiles();
 
             app.UseRouting();

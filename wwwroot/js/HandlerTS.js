@@ -121,8 +121,14 @@ function createPathWithNewParameter(action, param, value) {
 function resizebody() {
     var container = document.getElementById("divTable");
     var titleTable = document.getElementById("titleTable");
-    var w = window, d = document, e = d.documentElement, g = d.getElementsByTagName('body')[0], y = w.innerHeight || e.clientHeight || g.clientHeight, headerOffset = document.getElementById("header_body").offsetHeight, footerOffset = document.getElementById("footer_body").offsetHeight, stt = getComputedStyle(titleTable), titleTableOffset = titleTable.offsetHeight, styleBody = getComputedStyle(g);
-    container.style.height = (y - headerOffset - footerOffset - titleTableOffset
+    var g = document.getElementsByTagName('body')[0];
+    var availableHeight = document.documentElement.clientHeight; //|| g.clientHeight;
+    var headerOffset = document.getElementById("header_body").offsetHeight;
+    var footerOffset = document.getElementById("footer_body").offsetHeight;
+    var stt = getComputedStyle(titleTable);
+    var titleTableOffset = titleTable.offsetHeight;
+    var styleBody = getComputedStyle(g);
+    container.style.height = (availableHeight - headerOffset - footerOffset - titleTableOffset
         - parseInt(stt.paddingBottom)
         - parseInt(stt.paddingTop)
         - parseInt(styleBody.marginBottom)
