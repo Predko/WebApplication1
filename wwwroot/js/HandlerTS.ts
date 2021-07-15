@@ -6,20 +6,25 @@
 // из: https://coderoad.ru/14267781/Сортировка-таблицы-HTML-с-JavaScript#53880407
 
 // Sort table.
-function getCellValue(row: HTMLElement, indexTh: number) {
+function getCellValue(row: HTMLElement, indexTh: number)
+{
     return (row.children[indexTh] as HTMLElement).innerText || row.children[indexTh].textContent;
 }
 
-function getComparer(indexTh: number, asc: boolean) {
-    function compareCells(v1, v2) {
-        if (v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2)) {
+function getComparer(indexTh: number, asc: boolean)
+{
+    function compareCells(v1, v2)
+    {
+        if (v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2))
+        {
             return v1 - v2;
         }
 
         return v1.toString().localeCompare(v2);
     }
 
-    let comparer = function (a: HTMLTableRowElement, b: HTMLTableRowElement) {
+    let comparer = function (a: HTMLTableRowElement, b: HTMLTableRowElement)
+    {
         return compareCells(getCellValue(asc ? a : b, indexTh), getCellValue(asc ? b : a, indexTh));
     }
 
@@ -32,7 +37,8 @@ function getComparer(indexTh: number, asc: boolean) {
 //              undefined - "disabled" - сортировка запрещена.
 // Меняет значение сортировки на противоположное.
 // Сохраняет порядок сортировки для столбца в сессионном хранилище.
-function sortOrderFromTh(th: HTMLTableCellElement) {
+function sortOrderFromTh(th: HTMLTableCellElement)
+{
     let sortOrder;
     let resSortOrder;
 
@@ -40,8 +46,10 @@ function sortOrderFromTh(th: HTMLTableCellElement) {
 
     sortOrder = sessionStorage.getItem("Sort.Order.Th" + indexTh);
 
-    if (sortOrder == undefined || sortOrder == null) {
-        switch (th.dataset.sortOrder) {
+    if (sortOrder == undefined || sortOrder == null)
+    {
+        switch (th.dataset.sortOrder)
+        {
             case "none":
             case "ascending":
                 resSortOrder = true;
@@ -55,7 +63,8 @@ function sortOrderFromTh(th: HTMLTableCellElement) {
                 return undefined;
         }
     }
-    else {
+    else
+    {
         resSortOrder = (sortOrder === 'false');
     }
 
@@ -67,9 +76,11 @@ function sortOrderFromTh(th: HTMLTableCellElement) {
 
 document.querySelectorAll('th')
     .forEach(th => th.addEventListener('click',
-        (() => {
+        (() =>
+        {
             let sortOrder = sortOrderFromTh(th);
-            if (sortOrder === undefined) {
+            if (sortOrder === undefined)
+            {
                 return;
             }
 
@@ -84,19 +95,22 @@ document.querySelectorAll('th')
         }
         )));
 
-addEventListener("beforeunload", () => {
+addEventListener("beforeunload", () =>
+{
     // Save current scroll position.
     sessionStorage.setItem("currentScrollYPosition", String(document.getElementById("divTable").scrollTop));
 }, false);
 
-function restoreScrollPosition() {
+function restoreScrollPosition()
+{
     // Restore scroll position.
     let scrollTop: number = Number(sessionStorage.getItem("currentScrollYPosition")),
         divScrollContainer: HTMLElement = document.getElementById("divTable") as HTMLElement;
 
     let indexTh: number = Number(sessionStorage.getItem("Sort.ThIndex"));
 
-    if (indexTh === undefined || indexTh === null) {
+    if (indexTh === undefined || indexTh === null)
+    {
         indexTh = 0;
         sessionStorage.setItem("Sort.ThIndex", String(indexTh));
         sessionStorage.setItem("Sort.Order.Th" + indexTh, String(true));
@@ -107,14 +121,17 @@ function restoreScrollPosition() {
 
     SortTable(sortOrder, divScrollContainer, indexTh);
 
-    if (scrollTop && divScrollContainer) {
+    if (scrollTop && divScrollContainer)
+    {
         divScrollContainer.scrollTop = scrollTop;
     }
 }
 
 
-function SortTable(sortOrder: boolean, divScrollContainer: HTMLElement, indexTh) {
-    if (sortOrder !== undefined) {
+function SortTable(sortOrder: boolean, divScrollContainer: HTMLElement, indexTh)
+{
+    if (sortOrder !== undefined)
+    {
         const table: HTMLTableElement = divScrollContainer.querySelector('table');
         const tbody = table.querySelector('tbody');
         Array.prototype.slice.call(tbody.querySelectorAll('tr'))
@@ -123,7 +140,8 @@ function SortTable(sortOrder: boolean, divScrollContainer: HTMLElement, indexTh)
     }
 }
 
-document.querySelector('table').onclick = (event) => {
+document.querySelector('table').onclick = (event) =>
+{
     let cell: HTMLTableCellElement = event.target as HTMLTableCellElement;
     if (cell.tagName.toLowerCase() != 'td')
         return;
@@ -138,16 +156,18 @@ document.querySelector('table').onclick = (event) => {
 }
 
 // Создание адреса с параметрами.
-function createPathWithNewParameter(action:string, param:string, value:string): string
+function createPathWithNewParameter(action: string, param: string, value: string): string
 {
     const url = new URL(window.location.href);
     let params = url.search;
 
-    if (params === "" || params === null || params === undefined) {
+    if (params === "" || params === null || params === undefined)
+    {
 
         params = "?";
     }
-    else {
+    else
+    {
         params += "&";
     }
 
@@ -155,7 +175,8 @@ function createPathWithNewParameter(action:string, param:string, value:string): 
 }
 
 
-function resizebody() {
+function resizebody()
+{
     let container = document.getElementById("divTable");
     let titleTable = document.getElementById("titleTable");
     let g = document.getElementsByTagName('body')[0];
@@ -179,8 +200,10 @@ function resizebody() {
 
 // Добавляет контекстное меню к строке таблицы.
 
-const menu:HTMLDivElement = document.querySelector("#context-menu");
+const menu: HTMLDivElement = document.querySelector("#context-menu");
 const menuItems = menu.querySelectorAll(".context-menu__item");
+
+const table: HTMLTableElement = <HTMLTableElement>document.querySelector("#list-entities");
 
 let menuState = 0;
 
@@ -211,7 +234,7 @@ const contextMenuActive = "context-menu--active";
     {
         document.addEventListener("contextmenu", function (e)
         {
-            taskItemInContext = clickInsideElement(e, taskItemClassName);
+            taskItemInContext = <HTMLTableRowElement>clickInsideElement(e, taskItemClassName);
 
             if (taskItemInContext)
             {
@@ -357,22 +380,21 @@ const contextMenuActive = "context-menu--active";
 
     function positionMenu(e)
     {
+        const offsetMenuFromEdge: number = 25;
+
         clickCoords = getPosition(e);
         clickCoordsX = clickCoords.x;
         clickCoordsY = clickCoords.y;
 
-        menuWidth = menu.offsetWidth + 4;
-        menuHeight = menu.offsetHeight + 4;
+        menuWidth = menu.offsetWidth + offsetMenuFromEdge;
+        menuHeight = menu.offsetHeight + offsetMenuFromEdge;
 
         windowWidth = window.innerWidth;
         windowHeight = window.innerHeight;
 
-        menuPosition = getPosition(e);
-        console.log(menuPosition);
-
         if ((windowWidth - clickCoordsX) < menuWidth)
         {
-            menu.style.left = windowWidth - menuWidth + "px";
+            menu.style.left = clickCoordsX - menu.offsetWidth + "px";
         }
         else
         {
@@ -381,7 +403,7 @@ const contextMenuActive = "context-menu--active";
 
         if ((windowHeight - clickCoordsY) < menuHeight)
         {
-            menu.style.top = windowHeight - menuHeight + "px";
+            menu.style.top = clickCoordsY - menu.offsetHeight + "px";
         }
         else
         {
@@ -390,7 +412,8 @@ const contextMenuActive = "context-menu--active";
     }
 
     // Определяем позицию клика.
-    function getPosition(e: MouseEvent) {
+    function getPosition(e: MouseEvent)
+    {
         let posx = 0;
         let posy = 0;
 
@@ -404,13 +427,13 @@ const contextMenuActive = "context-menu--active";
             posy = me.pageY;
         }
         else
-        if (me.clientX || me.clientY)
-        {
-            posx = me.clientX + document.body.scrollLeft +
-                document.documentElement.scrollLeft;
-            posy = me.clientY + document.body.scrollTop +
-                document.documentElement.scrollTop;
-        }
+            if (me.clientX || me.clientY)
+            {
+                posx = me.clientX + document.body.scrollLeft +
+                    document.documentElement.scrollLeft;
+                posy = me.clientY + document.body.scrollTop +
+                    document.documentElement.scrollTop;
+            }
 
         return {
             x: posx,
@@ -418,3 +441,72 @@ const contextMenuActive = "context-menu--active";
         }
     }
 })();
+
+// Access the form element...
+const form = <HTMLFormElement>document.getElementById("#formId");
+
+// // ...and take over its submit event.
+// form.addEventListener("submit", function (event)
+// {
+//     event.preventDefault();
+
+//     submitForm();
+// });
+
+function submitForm()
+{
+    const XHR = new XMLHttpRequest();
+
+    // Bind the FormData object and the form element
+    const FD = new FormData(form);
+
+    // Define what happens on successful data submission
+    XHR.addEventListener("load", function (event)
+    {
+        alert((event.target as XMLHttpRequest).responseText);
+    });
+
+    // Define what happens in case of error
+    XHR.addEventListener("error", function (event)
+    {
+        alert('Oops! Something went wrong.');
+    });
+
+    // Set up our request
+    XHR.open("POST", "/customers/edit/submit");
+
+    // The data sent is what the user provided in the form
+    XHR.send(FD);
+}
+
+//     // 1. Создаём новый XMLHttpRequest-объект
+// let xhr = new XMLHttpRequest();
+
+// // 2. Настраиваем его: POST-запрос по URL /article/.../load
+// xhr.open('POST', '/customers/edit/submit');
+
+// // 3. Отсылаем запрос
+// xhr.send();
+
+// // 4. Этот код сработает после того, как мы получим ответ сервера
+// xhr.onload = function() {
+//   if (xhr.status != 200) { // анализируем HTTP-статус ответа, если статус не 200, то произошла ошибка
+//     alert(`Ошибка ${xhr.status}: ${xhr.statusText}`); // Например, 404: Not Found
+//   } else { // если всё прошло гладко, выводим результат
+//     alert(`Готово, получили ${xhr.response.length} байт`); // response -- это ответ сервера
+//   }
+// };
+
+// xhr.onprogress = function(event) {
+//   if (event.lengthComputable) {
+//     alert(`Получено ${event.loaded} из ${event.total} байт`);
+//   } else {
+//     alert(`Получено ${event.loaded} байт`); // если в ответе нет заголовка Content-Length
+//   }
+
+// };
+
+// xhr.onerror = function() {
+//   alert("Запрос не удался");
+// };
+

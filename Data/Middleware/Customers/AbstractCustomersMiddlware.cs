@@ -6,21 +6,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebApplication1
+namespace WebApplication1.Data.Middleware.Customers
 {
     public abstract class AbstractCustomersMiddlware
     {
-        protected virtual string TableName { get; }
+        protected abstract string TableName { get; }
 
-        protected virtual string ListEntities { get; }
+        protected abstract string ListEntities { get; }
 
-        protected virtual string EditEntity { get; }
+        protected abstract string EditEntity { get; }
 
-        protected virtual string DeleteEntity { get; }
+        protected abstract string DeleteEntity { get; }
 
-        protected virtual string NewEntity { get; }
+        protected abstract string NewEntity { get; }
 
-        protected virtual string EntityName { get => null; }
+        protected abstract string EntityName { get; }
 
         protected virtual string CustomerEntityName { get => "customer"; }
 
@@ -67,7 +67,7 @@ namespace WebApplication1
                 menu = new(contextMenuBegin);
             }
 
-            public static ContextMenuString GetBuilder() => new();
+            public static ContextMenuString Builder() => new();
 
             public ContextMenuString Append(string dataAction, string itemContent)
             {
@@ -76,7 +76,7 @@ namespace WebApplication1
                 return this;
             }
 
-            public string GetContextMenuString() => menu.Append(contextMenuEnd).ToString();
+            public string Build() => menu.Append(contextMenuEnd).ToString();
         }
 
         private delegate Task<bool> ShowDelegate(HttpContext context, int entityParent, int entityChild);

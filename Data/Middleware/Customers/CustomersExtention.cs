@@ -4,8 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApplication1.Data.Middleware.Customers;
 
-namespace WebApplication1.Data
+namespace WebApplication1.Data.Middleware
 {
     public static class CustomersExtention
     {

@@ -88,8 +88,8 @@ function restoreScrollPosition() {
 }
 function SortTable(sortOrder, divScrollContainer, indexTh) {
     if (sortOrder !== undefined) {
-        var table = divScrollContainer.querySelector('table');
-        var tbody_1 = table.querySelector('tbody');
+        var table_1 = divScrollContainer.querySelector('table');
+        var tbody_1 = table_1.querySelector('tbody');
         Array.prototype.slice.call(tbody_1.querySelectorAll('tr'))
             .sort(getComparer(indexTh, sortOrder))
             .forEach(function (tr) { return tbody_1.appendChild(tr); });
@@ -138,6 +138,7 @@ function resizebody() {
 // Добавляет контекстное меню к строке таблицы.
 var menu = document.querySelector("#context-menu");
 var menuItems = menu.querySelectorAll(".context-menu__item");
+var table = document.querySelector("#list-entities");
 var menuState = 0;
 var taskItemClassName = "task";
 var taskItemInContext;
@@ -255,23 +256,22 @@ var contextMenuActive = "context-menu--active";
         };
     }
     function positionMenu(e) {
+        var offsetMenuFromEdge = 25;
         clickCoords = getPosition(e);
         clickCoordsX = clickCoords.x;
         clickCoordsY = clickCoords.y;
-        menuWidth = menu.offsetWidth + 4;
-        menuHeight = menu.offsetHeight + 4;
+        menuWidth = menu.offsetWidth + offsetMenuFromEdge;
+        menuHeight = menu.offsetHeight + offsetMenuFromEdge;
         windowWidth = window.innerWidth;
         windowHeight = window.innerHeight;
-        menuPosition = getPosition(e);
-        console.log(menuPosition);
         if ((windowWidth - clickCoordsX) < menuWidth) {
-            menu.style.left = windowWidth - menuWidth + "px";
+            menu.style.left = clickCoordsX - menu.offsetWidth + "px";
         }
         else {
             menu.style.left = clickCoordsX + "px";
         }
         if ((windowHeight - clickCoordsY) < menuHeight) {
-            menu.style.top = windowHeight - menuHeight + "px";
+            menu.style.top = clickCoordsY - menu.offsetHeight + "px";
         }
         else {
             menu.style.top = clickCoordsY + "px";
@@ -299,4 +299,29 @@ var contextMenuActive = "context-menu--active";
         };
     }
 })();
+// Access the form element...
+var form = document.getElementById("#formId");
+// // ...and take over its submit event.
+// form.addEventListener("submit", function (event)
+// {
+//     event.preventDefault();
+//     submitForm();
+// });
+function submitForm() {
+    var XHR = new XMLHttpRequest();
+    // Bind the FormData object and the form element
+    var FD = new FormData(form);
+    // Define what happens on successful data submission
+    XHR.addEventListener("load", function (event) {
+        alert(event.target.responseText);
+    });
+    // Define what happens in case of error
+    XHR.addEventListener("error", function (event) {
+        alert('Oops! Something went wrong.');
+    });
+    // Set up our request
+    XHR.open("POST", "/customers/edit/submit");
+    // The data sent is what the user provided in the form
+    XHR.send(FD);
+}
 //# sourceMappingURL=HandlerTS.js.map

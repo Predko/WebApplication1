@@ -13,7 +13,7 @@ using System.Threading.Tasks;
  */
 
 
-namespace WebApplication1.Data
+namespace WebApplication1.Data.Middleware.Customers
 {
     public class CustomersMiddleware : AbstractCustomersMiddlware
     {
@@ -49,13 +49,13 @@ namespace WebApplication1.Data
 
     public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
-            ContextMenu = ContextMenuString.GetBuilder()
+            ContextMenu = ContextMenuString.Builder()
                 .Append("edit", "Просмотр и редактирование")
                 .Append("contracts", "Список договоров")
                 .Append("income", "Оплата договоров")
                 .Append("new", "Добавить нового клиента")
                 .Append("delete", "Удалить клиента")
-                .GetContextMenuString();
+                .Build();
         }
 
         /// <summary>
@@ -68,16 +68,14 @@ namespace WebApplication1.Data
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
             response.Append("<main>")
-                    .Append("<div id='titleTable'><h1 id='h1ListCustomers'>Список клиентов</h1></div>")
+                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список клиентов</h1></div>")
                     .Append("<div style='overflow-y:auto' id='divTable'>")
-                    .Append("<table id='list-customers' data-parameter='customer'><thead><tr>")
+                    .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
                     .Append("<th data-sort-order='ascending'>УНП</th>")
                     .Append("<th data-sort-order='ascending'>Название организации</th>")
                     .Append("</tr></thead><tbody>");
 
             DataView dataViewTable;
-
-            //context.Response.Headers["Content-Encoding"] = "identity";
 
             try
             {
@@ -92,7 +90,7 @@ namespace WebApplication1.Data
                 return true;
             }
 
-            dataViewTable.Sort = "NameCompany";
+            dataViewTable.Sort = dataViewTable.Table.Columns[1].ColumnName;
 
             foreach (DataRowView row in dataViewTable)
             {
@@ -107,7 +105,7 @@ namespace WebApplication1.Data
             response.Append("</tbody></table></div></main>")
                     .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
-                    .Append("<script src='js\\HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
+                    .Append("<script src='/js/HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
 
             await context.Response.WriteAsync(response.ToString());
 
@@ -124,13 +122,11 @@ namespace WebApplication1.Data
         /// <returns>False if an error is occured, otherwise - true</returns>
         protected override async Task<bool> ShowEditEntity(HttpContext context, int customerId, int entityId)
         {
-            DataTable dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
+            DataTable dataTable = Storage[TableName, $"SELECT * FROM Customers WHERE Id='{customerId}'"];
             DataRow row = dataTable.Rows[0];
 
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                                        "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
-
-            context.Response.Headers["Content-Encoding"] = "identity";
 
             if (row == null)
             {
@@ -140,7 +136,7 @@ namespace WebApplication1.Data
             else
             {
                 response.Append($"<main><h1>Подробные данные клиента</h1>")
-                        .Append($"<form method='post' action='{EditEntity}/submit'>")
+                        .Append($"<form method='post' action='{EditEntity}/submit' id='formId'>")
                         .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}'/>")
 
                         .Append("<table><tbody>");
@@ -199,7 +195,7 @@ namespace WebApplication1.Data
             {
                 Type t = row.ItemArray[i].GetType();
 
-                row[i] = SetRowValueFromString(row.ItemArray[i].GetType(), formValues[i]);
+                row[i] = GetRowValueFromString(row.ItemArray[i].GetType(), formValues[i]);
             }
 
             row.EndEdit();
@@ -211,7 +207,7 @@ namespace WebApplication1.Data
             return true;
         }
 
-        private object SetRowValueFromString(Type type, string value)
+        private object GetRowValueFromString(Type type, string value)
         {
             if (type == typeof(int))
             {

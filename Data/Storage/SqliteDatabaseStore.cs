@@ -7,6 +7,7 @@ using System.Text;
 using System;
 using System.IO;
 using System.Linq;
+using System.Diagnostics;
 
 namespace StorageDatabaseNameSpace
 {
@@ -260,7 +261,45 @@ namespace StorageDatabaseNameSpace
 
                             for (int i = 0; i != reader.FieldCount; i++)
                             {
-                                dr[i] = reader[i];
+                                if (reader[i].GetType() != dt.Columns[i].DataType)
+                                {
+                                    Debug.Write($" {i}={dt.Columns[i].DataType}=<{reader[i].GetType()}>{reader[i]}||");
+
+                                    Type type = dt.Columns[i].DataType;
+
+                                    if (type == typeof(long))
+                                    {
+                                        dr[i] = 0L;
+                                    }
+                                    else
+                                    if (type == typeof(DateTime))
+                                    {
+                                        dr[i] = DateTime.MinValue;
+                                    }
+                                    else
+                                    if (type == typeof(decimal))
+                                    {
+                                        dr[i] = 0m;
+                                    }
+                                    else
+                                    if (type == typeof(bool))
+                                    {
+                                        dr[i] = false;
+                                    }
+                                    else
+                                    if (type == typeof(string))
+                                    {
+                                        dr[i] = "";
+                                    }
+                                    else
+                                    {
+                                        dr[i] = null;
+                                    }
+                                }
+                                else
+                                {
+                                    dr[i] = reader[i];
+                                }
                             }
 
                             dt.Rows.Add(dr);
