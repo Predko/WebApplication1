@@ -12,6 +12,7 @@
     overflow-y: auto;
     height: 300px;
     border: 2px solid black;
+    display: none;
 }
 
 table {
@@ -35,9 +36,9 @@ th, td {
     min-width: 10em;
 }
 
-    th:not(:first-child), td:not(:first-child) {
-        border-left: 1px solid black;
-    }
+th:not(:first-child), td:not(:first-child) {
+    border-left: 1px solid black;
+}
 
 tr:nth-child(even) {
     background: #ddd;
@@ -79,19 +80,21 @@ footer {
     z-index: 10;
 }
 
-.context-menu ul li a {
-    text-decoration: none;
-    color: black;
-}
+    .context-menu ul li p {
+        text-decoration: none;
+        color: black;
+        padding: 2px 5px 2px 5px;
+        margin: 0;
+    }
 
-.context-menu ul li:hover {
-    background-color: rgb(123, 204, 170);
-}
+    .context-menu ul li:hover {
+        background-color: rgb(123, 204, 170);
+    }
 
-.context-menu:hover {
-    transform: scale(1.2);
-    box-shadow: 5px 5px 15px 3px rgba(34, 60, 80, 0.4);
-}
+    .context-menu:hover {
+        transform: scale(1.2);
+        box-shadow: 5px 5px 15px 3px rgba(34, 60, 80, 0.4);
+    }
 
 .context-menu--active {
     display: block;

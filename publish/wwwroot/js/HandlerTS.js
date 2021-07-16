@@ -4,6 +4,11 @@
 // и
 // из: https://coderoad.ru/14267781/Сортировка-таблицы-HTML-с-JavaScript#53880407
 // Sort table.
+//onresize='resizebody()' onload='resizebody()'
+var body = document.querySelector('body');
+body.onresize = body.onload = function (event) {
+    resizebody();
+};
 function getCellValue(row, indexTh) {
     return row.children[indexTh].innerText || row.children[indexTh].textContent;
 }
@@ -49,7 +54,7 @@ function sortOrderFromTh(th) {
         resSortOrder = (sortOrder === 'false');
     }
     sessionStorage.setItem("Sort.ThIndex", indexTh.toString());
-    sessionStorage.setItem("Sort.Order.Th" + indexTh, resSortOrder);
+    sessionStorage.setItem("Sort.Order.Th" + indexTh, resSortOrder.toString());
     return resSortOrder;
 }
 document.querySelectorAll('th')
@@ -68,12 +73,13 @@ document.querySelectorAll('th')
 })); });
 addEventListener("beforeunload", function () {
     // Save current scroll position.
-    sessionStorage.setItem("currentScrollYPosition", String(document.getElementById("divTable").scrollTop));
+    var scrollTop = String(document.getElementById("divTable").scrollTop);
+    sessionStorage.setItem("currentScrollYPosition", scrollTop);
 }, false);
 function restoreScrollPosition() {
     // Restore scroll position.
-    var scrollTop = Number(sessionStorage.getItem("currentScrollYPosition")), divScrollContainer = document.getElementById("divTable");
-    var indexTh = Number(sessionStorage.getItem("Sort.ThIndex"));
+    var scrollTop = (Number)(sessionStorage.getItem("currentScrollYPosition")), divScrollContainer = document.getElementById("divTable");
+    var indexTh = (Number)(sessionStorage.getItem("Sort.ThIndex"));
     if (indexTh === undefined || indexTh === null) {
         indexTh = 0;
         sessionStorage.setItem("Sort.ThIndex", String(indexTh));
@@ -96,6 +102,9 @@ function SortTable(sortOrder, divScrollContainer, indexTh) {
     }
 }
 document.querySelector('table').onclick = function (event) {
+    if (menuState !== 0) {
+        return;
+    }
     var cell = event.target;
     if (cell.tagName.toLowerCase() != 'td')
         return;
@@ -128,12 +137,15 @@ function resizebody() {
     var stt = getComputedStyle(titleTable);
     var titleTableOffset = titleTable.offsetHeight;
     var styleBody = getComputedStyle(g);
-    container.style.height = (availableHeight - headerOffset - footerOffset - titleTableOffset
+    var containerHeight = (availableHeight - headerOffset - footerOffset - titleTableOffset
         - parseInt(stt.paddingBottom)
         - parseInt(stt.paddingTop)
         - parseInt(styleBody.marginBottom)
-        - parseInt(styleBody.marginTop)) + "px";
+        - parseInt(styleBody.marginTop));
+    container.style.height = containerHeight + "px";
+    document.cookie = "containerHeight=" + containerHeight + "; path=/; max-age=10000";
     restoreScrollPosition();
+    container.style.display = "block";
 }
 // Добавляет контекстное меню к строке таблицы.
 var menu = document.querySelector("#context-menu");
@@ -174,7 +186,7 @@ var contextMenuActive = "context-menu--active";
     // Проверяет, соответствует ли элемент(в аргументе события) указанному в переменной className классу.
     // Если да - возвращает элемент, если нет - false.
     function clickInsideElement(e, className) {
-        var el = e.srcElement || e.target;
+        var el = e.target;
         if (el.classList.contains(className)) {
             return el;
         }
@@ -205,6 +217,7 @@ var contextMenuActive = "context-menu--active";
     // Если нажата левая кнопка не на контекстном меню - скрывает меню.
     function clickListener() {
         var leftBtn = 0;
+        var rightBtn = 1;
         document.addEventListener("click", function (e) {
             var clickeElIsLink = clickInsideElement(e, contextMenuLinkClassName);
             if (clickeElIsLink) {
@@ -212,8 +225,8 @@ var contextMenuActive = "context-menu--active";
                 menuItemListener(clickeElIsLink);
             }
             else {
-                var button = e.which || e.button;
-                if (button === 1) {
+                var button = e.button;
+                if (button === rightBtn || button === leftBtn) {
                     toggleMenuOff();
                 }
             }
@@ -299,29 +312,4 @@ var contextMenuActive = "context-menu--active";
         };
     }
 })();
-// Access the form element...
-var form = document.getElementById("#formId");
-// // ...and take over its submit event.
-// form.addEventListener("submit", function (event)
-// {
-//     event.preventDefault();
-//     submitForm();
-// });
-function submitForm() {
-    var XHR = new XMLHttpRequest();
-    // Bind the FormData object and the form element
-    var FD = new FormData(form);
-    // Define what happens on successful data submission
-    XHR.addEventListener("load", function (event) {
-        alert(event.target.responseText);
-    });
-    // Define what happens in case of error
-    XHR.addEventListener("error", function (event) {
-        alert('Oops! Something went wrong.');
-    });
-    // Set up our request
-    XHR.open("POST", "/customers/edit/submit");
-    // The data sent is what the user provided in the form
-    XHR.send(FD);
-}
 //# sourceMappingURL=HandlerTS.js.map
