@@ -32,7 +32,7 @@ namespace WebApplication1
     <link rel ='stylesheet' href='/Styles/Site.css'/>
     {0}
 </head>
-<body onresize='resizebody()' onload='resizebody()'>
+<body>
     <header id='header_body'>
         <nav>
             <ul>

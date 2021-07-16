@@ -33,7 +33,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
         private const string contextMenuItem =
 @"<li class='context-menu__item'>
-      <a href = '#' class='context-menu__link' data-action='{0}'>{1}</a>
+      <p class='context-menu__link' data-action='{0}'>{1}</p>
     </li>";
 
         private const string contextMenuEnd =

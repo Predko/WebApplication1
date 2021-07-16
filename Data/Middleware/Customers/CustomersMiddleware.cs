@@ -47,7 +47,7 @@ namespace WebApplication1.Data.Middleware.Customers
         };
 
 
-    public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
+        public CustomersMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
             ContextMenu = ContextMenuString.Builder()
                 .Append("edit", "Просмотр и редактирование")
@@ -67,10 +67,22 @@ namespace WebApplication1.Data.Middleware.Customers
         {
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
+
             response.Append("<main>")
-                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список клиентов</h1></div>")
-                    .Append("<div style='overflow-y:auto' id='divTable'>")
-                    .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
+                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список клиентов</h1></div>");
+
+            string containerHeight = context.Request.Cookies["containerHeight"];
+
+            if (containerHeight != null)
+            {
+                response.Append($"<div style='overflow-y:auto' id='divTable' style='height:{containerHeight}px'>");
+            }
+            else
+            {
+                response.Append($"<div style='overflow-y:auto' id='divTable'>");
+            }
+
+            response.Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
                     .Append("<th data-sort-order='ascending'>УНП</th>")
                     .Append("<th data-sort-order='ascending'>Название организации</th>")
                     .Append("</tr></thead><tbody>");
@@ -136,19 +148,20 @@ namespace WebApplication1.Data.Middleware.Customers
             else
             {
                 response.Append($"<main><h1>Подробные данные клиента</h1>")
-                        .Append($"<form method='post' action='{EditEntity}/submit' id='formId'>")
+                        .Append($"<form method='POST' id='formId'>")
+                        //.Append($"<form method='post' action='{EditEntity}/submit' id='formId'>")
                         .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}'/>")
 
                         .Append("<table><tbody>");
 
                 var columns = dataTable.Columns;
 
-                for ( int i = 1; i != row.ItemArray.Count(); i++)
+                for (int i = 1; i != row.ItemArray.Count(); i++)
                 {
                     response.Append($"<tr><td><label>{columnNames[i]}</label></td>")
                             .Append($"<td><input name='{columns[i].ColumnName}' value='{row[i]}'/></td></tr>");
                 }
-                
+
                 response.Append("</tbody></table>")
 
                         .Append("<p><input type='submit' value='Отправить'>")
@@ -156,7 +169,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
                         .Append("</form>")
                         .Append("</main>")
-                        .Append(Startup.EndHtmlPages + "</html>");
+                        .Append(Startup.EndHtmlPages ).Append("<script src='/js/SubmitForm.js'></script><html>");
             }
 
             await context.Response.WriteAsync(response.ToString());
@@ -178,12 +191,13 @@ namespace WebApplication1.Data.Middleware.Customers
         {
             if (customerId == -1)
             {
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                
                 await context.Response.WriteAsync("Ошибка запроса. Отсутствует Id клиента");
 
                 return true;
             }
 
-            
             var formValues = context.Request.Form.Select(e => e.Value).ToArray();
 
             DataTable dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
@@ -202,12 +216,15 @@ namespace WebApplication1.Data.Middleware.Customers
 
             Storage.UpdateDataTable("Customers");
 
-            await context.Response.WriteAsync("Данные обновлены для клиента с id = " + customerId);
+            context.Response.StatusCode = StatusCodes.Status202Accepted;
+            context.Response.ContentType = "application/text; charset=UTF-8";
+
+            await context.Response.WriteAsync($"Данные для клиента с id = {customerId} обновлены успешно");
 
             return true;
         }
 
-        private object GetRowValueFromString(Type type, string value)
+    private object GetRowValueFromString(Type type, string value)
         {
             if (type == typeof(int))
             {
