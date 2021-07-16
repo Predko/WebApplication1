@@ -69,7 +69,7 @@ namespace WebApplication1.Data.Middleware.Customers
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
 
             response.Append("<main>")
-                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список клиентов</h1></div>");
+                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'> Список клиентов </h1></div>");
 
             string containerHeight = context.Request.Cookies["containerHeight"];
 

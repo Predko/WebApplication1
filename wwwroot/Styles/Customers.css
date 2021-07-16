@@ -40,6 +40,10 @@ th:not(:first-child), td:not(:first-child) {
     border-left: 1px solid black;
 }
 
+th:not(:last-child) {
+    border-right: 1px solid black;
+}
+
 tr:nth-child(even) {
     background: #ddd;
 }
@@ -56,6 +60,7 @@ tbody tr:hover {
 #h1ListEntities {
     margin-bottom: 0px;
     margin-top: 0px;
+    text-align: center;
 }
 
 #titleTable {
@@ -98,4 +103,14 @@ footer {
 
 .context-menu--active {
     display: block;
+}
+
+#main-page-ul {
+    font-size: 1.5em;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
 }

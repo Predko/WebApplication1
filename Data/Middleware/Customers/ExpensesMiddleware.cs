@@ -10,23 +10,23 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data.Middleware.Customers
 {
-    public class IncomeMiddleware : AbstractCustomersMiddlware
+    public class ExpensesMiddleware : AbstractCustomersMiddlware
     {
-        protected override string TableName { get => "Income"; }
+        protected override string TableName { get => "Expenses"; }
 
-        protected override string EntityName { get => "income"; }
+        protected override string EntityName { get => "expenses"; }
 
-        protected override string ListEntities { get => "/customers/income"; }
+        protected override string ListEntities { get => "/customers/expenses"; }
 
-        protected override string EditEntity { get => "/customers/income/edit"; }
+        protected override string EditEntity { get => "/customers/expenses/edit"; }
 
-        protected override string DeleteEntity { get => "/customers/income/delete"; }
+        protected override string DeleteEntity { get => "/customers/expenses/delete"; }
 
-        protected override string NewEntity { get => "/customers/income/new"; }
+        protected override string NewEntity { get => "/customers/expenses/new"; }
 
         protected override string ContextMenu { get; }
 
-        public IncomeMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
+        public ExpensesMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
             ContextMenu = ContextMenuString.Builder()
                 .Append("edit", "Просмотр и редактирование")
@@ -44,50 +44,27 @@ namespace WebApplication1.Data.Middleware.Customers
         {
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
+            response.Append("<main>")
+                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список платежей</h1></div>")
+                    .Append("<div style='overflow-y:auto' id='divTable'>")
+                    .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
+                    .Append("<th data-sort-order='ascending'>Дата</th>")
+                    .Append("<th data-sort-order='ascending'>Номер</th>")
+                    .Append("<th data-sort-order='ascending'>Сумма</th>")
+                    .Append("</tr></thead><tbody>");
+
             DataView dataViewTable;
 
             try
             {
-                string query;
-                string NameCustomer = "";
-
-                if (customerId != -1)
-                {
-                    foreach (DataRow r in Storage[CustomersTableName].Rows)
-                    {
-                        if ((long)r["Id"] == customerId)
-                        {
-                            NameCustomer = $" для {(string)r["NameCompany"]}";
-                        }
-                    }
-
-                    query = $"SELECT * FROM {TableName} WHERE CustomerId = {customerId}";
-
-                    dataViewTable = Storage[TableName, query]?.DefaultView;
-                }
-                else
-                {
-                    query = $"SELECT * FROM {TableName}";
-
-                    dataViewTable = Storage[TableName]?.DefaultView;
-                }
+                dataViewTable = Storage[TableName]?.DefaultView;
 
                 if (dataViewTable == null)
                 {
                     response.Clear();
 
-                    await context.Response.WriteAsync("Не удалось получить данные из базы данных по строке запроса:\n" +
-                        query);
+                    await context.Response.WriteAsync("Не удалось получить данные из базы данных");
                 }
-
-                response.Append("<main>")
-                        .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список поступлений{NameCustomer}</h1></div>")
-                        .Append("<div style='overflow-y:auto' id='divTable'>")
-                        .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
-                        .Append("<th data-sort-order='ascending'>Дата</th>")
-                        .Append("<th data-sort-order='ascending'>Номер</th>")
-                        .Append("<th data-sort-order='ascending'>Сумма</th>")
-                        .Append("</tr></thead><tbody>");
             }
             catch (SqliteException ex)
             {
@@ -123,12 +100,12 @@ namespace WebApplication1.Data.Middleware.Customers
         //    throw new NotImplementedException(); return true;
         //}
 
-        //protected override async Task ShowEditEntity(HttpContext context, int customerId, int? incomeId)
+        //protected override async Task ShowEditEntity(HttpContext context, int customerId, int? expensesId)
         //{
         //    throw new NotImplementedException();
         //}
 
-        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? incomeId)
+        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? expensesId)
         //{
         //    throw new NotImplementedException();
         //}

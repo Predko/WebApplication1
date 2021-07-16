@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data.Middleware.Customers
 {
-    public class ContractsMiddleware: AbstractCustomersMiddlware
+    public class ContractsMiddleware : AbstractCustomersMiddlware
     {
         protected override string TableName { get => "Contracts"; }
 
@@ -26,7 +26,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
         protected override string ContextMenu { get; }
 
-        public ContractsMiddleware(RequestDelegate next, StorageDatabase storage): base(next, storage)
+        public ContractsMiddleware(RequestDelegate next, StorageDatabase storage) : base(next, storage)
         {
             ContextMenu = ContextMenuString.Builder()
                 .Append("edit", "Просмотр и редактирование")
@@ -40,12 +40,50 @@ namespace WebApplication1.Data.Middleware.Customers
         /// </summary>
         /// <param name="context"></param>
         /// <returns>false if an error is occured, otherwise - true</returns>
-        protected override async Task<bool> ShowListOfEntities(HttpContext context, int p1, int p2)
+        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int p2)
         {
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                             "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
-            response.Append("<main>")
-                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список договоров</h1></div>")
+            DataView dataViewTable;
+
+            try
+            {
+                string query;
+                string NameCustomer = "";
+
+                if (customerId != -1)
+                {
+                    foreach (DataRow r in Storage[CustomersTableName].Rows)
+                    {
+                        if ((long)r["Id"] == customerId)
+                        {
+                            NameCustomer = $" для {(string)r["NameCompany"]}";
+                        }
+                    }
+
+                    query = $"SELECT * FROM {TableName} WHERE CustomerId = {customerId}";
+
+                    dataViewTable = Storage[TableName, query]?.DefaultView;
+                }
+                else
+                {
+                    query = $"SELECT * FROM {TableName}";
+
+                    dataViewTable = Storage[TableName]?.DefaultView;
+                }
+
+                if (dataViewTable == null)
+                {
+                    response.Clear();
+
+                    await context.Response.WriteAsync("Не удалось получить данные из базы данных по строке запроса:\n" +
+                        query);
+
+                    return true;
+                }
+            
+                response.Append("<main>")
+                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список договоров{NameCustomer}</h1></div>")
                     .Append("<div style='overflow-y:auto' id='divTable'>")
                     .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
                     .Append("<th data-sort-order='ascending'>Дата</th>")
@@ -54,11 +92,6 @@ namespace WebApplication1.Data.Middleware.Customers
                     .Append("<th data-sort-order='ascending'>Наличие</th>")
                     .Append("</tr></thead><tbody>");
 
-            DataView dataViewTable;
-
-            try
-            {
-                dataViewTable = Storage[TableName].DefaultView;
             }
             catch (SqliteException ex)
             {

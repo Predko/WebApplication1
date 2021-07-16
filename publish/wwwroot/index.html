@@ -1,29 +1,37 @@
 ﻿<!DOCTYPE html>
-<html lang="ru" xml:lang="ru">
+<html lang='ru' xml:lang='ru'>
 <head>
-    <meta charset="utf-8" />
-    <title>Главная страница</title>
-    <link rel="stylesheet" href="/Styles/Site.css" />
+    <meta charset='utf-8' />
+    <title>Main page</title>
+    <link rel='stylesheet' href='/Styles/Site.css' />
+    <link rel='stylesheet' href='/Styles/Customers.css' />
 </head>
 <body>
-    <header>
+    <header id='header_body'>
         <nav>
             <ul>
-                <li class=" menu-item"><a class=" menu-item-link" href=" /index.html"> Pages </a></li>
-                <li class=" menu-item"><a class=" menu-item-link" href=" /customers"> Customers </a></li>
-                <li class=" menu-item"><a class=" menu-item-link" href=" /info"> Info </a></li>
-                <li class=" menu-item"><a class=" menu-item-link" href=" /disk_D"> disk D</a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers'> Клиенты </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers/contracts'> Договоры </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers/income'> Поступления </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers/expenses'> Выплаты </a></li>
             </ul>
         </nav>
     </header>
-    
-    <main>
-    <article>
-        <h1>wwwroot/index.html</h1>
-    </article>
+    <main id="main">
+        <div id='titleTable'>
+            <h1 id='h1ListEntities'> Сайт для учёта клиентов ИП, заключённых договоров, расчётов и затрат. </h1>
+            <div id="main-page-ul">
+                <ul>
+                    <li>Позволяет посмотреть подробную информацию.</li>
+                    <li>Отредактировать.</li>
+                    <li>Добавить нового клиента, договор, банковскую выписку.</li>
+                    <li>Удалить.</li>
+                </ul>
+            </div>
+        </div>
+        <div style='overflow-y:auto' id='divTable'></div>
     </main>
-    
-    <footer>
+    <footer id='footer_body'>
     </footer>
 </body>
 </html>

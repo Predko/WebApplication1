@@ -10,6 +10,8 @@ namespace WebApplication1.Data.Middleware.Customers
 {
     public abstract class AbstractCustomersMiddlware
     {
+        protected string CustomersTableName => "Customers";
+
         protected abstract string TableName { get; }
 
         protected abstract string ListEntities { get; }

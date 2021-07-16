@@ -36,10 +36,10 @@ namespace WebApplication1
     <header id='header_body'>
         <nav>
             <ul>
-                <li class='menu-item'><a class='menu-item-link' href='/index.html'> Pages </a></li>
-                <li class='menu-item'><a class='menu-item-link' href='/customers'> Customers </a></li>
-                <li class='menu-item'><a class='menu-item-link' href='/info'> Info </a></li>
-                <li class='menu-item'><a class='menu-item-link' href='/disk_D'> disk D</a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers'> Клиенты </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers/contracts'> Договоры </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers/income'> Поступления </a></li>
+                <li class='menu-item'><a class='menu-item-link' href='/customers/expenses'> Выплаты </a></li>
             </ul>
         </nav>
     </header>";
@@ -75,44 +75,20 @@ namespace WebApplication1
             }
 
             //app.UseSession();
-            
+
             app.UseDefaultFiles();
 
             app.UseRouting();
 
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions()
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(@"d:\")),
-
-                RequestPath = new PathString("/disk_D")
-            });
-
             app.UseStaticFiles();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGet("/info", async context =>
-                {
-                    await context.Response.WriteAsync(returnNamePlusValueString(nameof(Environment.ApplicationName), Environment.ApplicationName)
-                        + returnNamePlusValueString(nameof(Environment.ContentRootPath), Environment.ContentRootPath)
-                        + returnNamePlusValueString(nameof(Environment.ContentRootFileProvider), Environment.ContentRootFileProvider)
-                        + returnNamePlusValueString(nameof(Environment.EnvironmentName), Environment.EnvironmentName)
-                        + returnNamePlusValueString(nameof(Environment.WebRootPath), Environment.WebRootPath)
-                        + returnNamePlusValueString(nameof(Environment.WebRootFileProvider), Environment.WebRootFileProvider));
-                    ;
-                });
-
-                static string returnNamePlusValueString(string name, object var)
-                {
-                    return name + " = " + var + "\n";
-                }
-            });
 
             app.UseCustomers(storage);
 
             app.UseContracts(storage);
 
             app.UseIncome(storage);
+
+            app.UseExpenses(storage);
         }
     }
 }
