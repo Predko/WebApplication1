@@ -65,10 +65,8 @@ namespace WebApplication1.Data.Middleware.Customers
         /// <returns>false if an error is occured, otherwise - true</returns>
         protected override async Task<bool> ShowListOfEntities(HttpContext context, int p1, int p2)
         {
-            StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
-                                            "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
-
-            response.Append("<main>")
+            StringBuilder response = new StringBuilder(Startup.BeginHtmlPages)
+                    .Append("<main>")
                     .Append($"<div id='titleTable'><h1 id='h1ListEntities'> Список клиентов </h1></div>");
 
             string containerHeight = context.Request.Cookies["containerHeight"];
@@ -81,11 +79,6 @@ namespace WebApplication1.Data.Middleware.Customers
             {
                 response.Append($"<div style='overflow-y:auto' id='divTable'>");
             }
-
-            response.Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
-                    .Append("<th data-sort-order='ascending'>УНП</th>")
-                    .Append("<th data-sort-order='ascending'>Название организации</th>")
-                    .Append("</tr></thead><tbody>");
 
             DataView dataViewTable;
 
@@ -104,17 +97,31 @@ namespace WebApplication1.Data.Middleware.Customers
 
             dataViewTable.Sort = dataViewTable.Table.Columns[1].ColumnName;
 
+            StringBuilder tbody = new("<tbody>");
+
+            const int columnsNumber = 2;
+            int[] maxlength = new int[columnsNumber];
+
             foreach (DataRowView row in dataViewTable)
             {
                 string unp = row["UNP"] as string;
+                string nameCompany = ((string)row["NameCompany"]);
+                
+                maxlength[0] = unp.Length > maxlength[0] ? unp.Length : maxlength[0];
+                maxlength[1] = nameCompany.Length > maxlength[1] ? nameCompany.Length : maxlength[1];
 
-                response.Append(string.Format("<tr class='task' id='{0}'><td>{1}</td><td>{2}</td></tr>",
+                tbody.Append(string.Format("<tr class='task' id='{0}'><td>{1}</td><td>{2}</td></tr>",
                                                 row["Id"].ToString(),
                                                 unp ?? "",
-                                                row["NameCompany"]));
+                                                nameCompany));
             }
 
-            response.Append("</tbody></table></div></main>")
+            response.Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
+                    .Append($"<th width={maxlength[0]}ex data-sort-order='ascending'>УНП</th>")
+                    .Append($"<th data-sort-order='ascending'>Название организации</th>")   //  width={columnsWidth[1]}%
+                    .Append("</tr></thead>")
+                    .Append(tbody).Append("</tbody>")
+                    .Append("</table></div></main>")
                     .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
                     .Append("<script src='/js/HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>

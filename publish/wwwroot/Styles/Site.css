@@ -9,19 +9,19 @@ nav {
     padding: 1px;
 }
 
-nav ul {
-    list-style: none;
-    padding-left: 0px;
-    margin: 0px;
-    overflow: hidden;
-}
+    nav ul {
+        list-style: none;
+        padding-left: 0px;
+        margin: 0px;
+        overflow: hidden;
+    }
 
 .menu-item-link:hover {
     background-color: aquamarine;
 }
 
 .menu-item {
-    float: left;
+    /* float: left; */
     background-color: lightgray;
     color: black;
     display: inline-block;
@@ -33,5 +33,122 @@ nav ul {
     display: block;
 }
 
-body {
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+#h1ListCustomers {
+    text-align: center;
+}
+
+#divTable {
+    overflow-y: auto;
+    height: 300px;
+    border: 2px solid black;
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 0px solid black;
+}
+
+thead, th {
+    position: -webkit-sticky;
+    position: -moz-sticky;
+    position: -ms-sticky;
+    position: -o-sticky;
+    position: sticky;
+    top: 0px;
+    background-color: lightgray;
+}
+
+th {
+    text-align: left;
+}
+
+th, td {
+    padding: 3px 10px 3px 10px;
+    min-width: 10em;
+}
+
+    th:not(:first-child), td:not(:first-child) {
+        border-left: 1px solid black;
+    }
+
+    th:not(:last-child) {
+        border-right: 1px solid black;
+    }
+
+tr:nth-child(even) {
+    background: #ddd;
+}
+
+tr:nth-child(odd) {
+    background: #eee;
+}
+
+tbody tr:hover {
+    background-color: burlywood;
+}
+
+
+#h1ListEntities {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    text-align: center;
+}
+
+#titleTable {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+footer {
+    height: 20px;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    -webkit-box-shadow: 10px 10px 20px 0px rgba(34, 60, 80, 0.4);
+    -moz-box-shadow: 10px 10px 20px 0px rgba(34, 60, 80, 0.4);
+    box-shadow: 10px 10px 20px 0px rgba(34, 60, 80, 0.4);
+    transition: box-shadow 0.5s, transform 0.5s;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 10;
+}
+
+    .context-menu ul li p {
+        text-decoration: none;
+        color: black;
+        padding: 2px 5px 2px 5px;
+        margin: 0;
+    }
+
+    .context-menu ul li:hover {
+        background-color: rgb(123, 204, 170);
+    }
+
+    .context-menu:hover {
+        transform: scale(1.2);
+        box-shadow: 5px 5px 15px 3px rgba(34, 60, 80, 0.4);
+    }
+
+.context-menu--active {
+    display: block;
+}
+
+#main-page-ul {
+    font-size: 1.5em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
 }

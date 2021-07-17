@@ -42,14 +42,12 @@ namespace WebApplication1.Data.Middleware.Customers
         /// <returns>false if an error is occured, otherwise - true</returns>
         protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int p2)
         {
-            StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
-                                            "<link rel = 'stylesheet' href= '/Styles/Customers.css' />"));
             DataView dataViewTable;
+            string NameCustomer = "";
 
             try
             {
                 string query;
-                string NameCustomer = "";
 
                 if (customerId != -1)
                 {
@@ -74,47 +72,63 @@ namespace WebApplication1.Data.Middleware.Customers
 
                 if (dataViewTable == null)
                 {
-                    response.Clear();
-
                     await context.Response.WriteAsync("Не удалось получить данные из базы данных по строке запроса:\n" +
                         query);
 
                     return true;
                 }
-            
-                response.Append("<main>")
-                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список договоров{NameCustomer}</h1></div>")
-                    .Append("<div style='overflow-y:auto' id='divTable'>")
-                    .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
-                    .Append("<th data-sort-order='ascending'>Дата</th>")
-                    .Append("<th data-sort-order='ascending'>Номер</th>")
-                    .Append("<th data-sort-order='ascending'>Сумма</th>")
-                    .Append("<th data-sort-order='ascending'>Наличие</th>")
-                    .Append("</tr></thead><tbody>");
 
             }
             catch (SqliteException ex)
             {
-                response.Clear().Append(ex.Message);
-
-                await context.Response.WriteAsync(response.ToString());
+                await context.Response.WriteAsync(ex.Message);
 
                 return true;
             }
 
             dataViewTable.Sort = dataViewTable.Table.Columns[2].ColumnName; // Date
 
+            StringBuilder tbody = new("<tbody>");
+
+            const int columnsNumber = 4;
+            int[] maxLength = new int[columnsNumber];
+            string[] columns = new string[columnsNumber];
+
             foreach (DataRowView row in dataViewTable)
             {
-                response.Append(string.Format("<tr class='task' id='{0}'><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>",
+                columns[0] = row["Date"] as string;
+                columns[1] = row["Number"].ToString();
+                columns[2] = row["Price"] as string;
+                columns[3] = row["Available"].ToString() == "1" ? "Да" : "Нет";
+
+                for (int i = 0; i != columnsNumber; i++)
+                {
+                    maxLength[i] = maxLength[i] >= columns[i].Length ? maxLength[i] : columns[i].Length;
+                }
+
+                tbody.Append(string.Format("<tr class='task' id='{0}'><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>",
                                                 row["Id"].ToString(),
-                                                row["Date"],
-                                                row["Number"],
-                                                row["Price"],
-                                                row["Available"]));
+                                                columns[0],
+                                                columns[1],
+                                                columns[2],
+                                                columns[3]));
             }
 
-            response.Append("</tbody></table></div></main>")
+            StringBuilder response = new StringBuilder()
+                    .Append(Startup.BeginHtmlPages)
+                    .Append("<main>")
+                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список договоров{NameCustomer}</h1></div>")
+                    .Append("<div style='overflow-y:auto' id='divTable'>")
+                    .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
+                    .Append($"<th width={maxLength[0]}ex data-sort-order='ascending'>Дата</th>")
+                    .Append($"<th width={maxLength[0]}ex data-sort-order='ascending'>Номер</th>")
+                    .Append($"<th width={maxLength[0]}ex data-sort-order='ascending'>Сумма</th>")
+                    .Append("<th data-sort-order='ascending'>Наличие</th>")
+                    .Append("</tr></thead>")
+                    
+                    .Append(tbody).Append("</tbody>")
+                    
+                    .Append("</table></div></main>")
                     .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
                     .Append("<script src='/js/HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>

@@ -30,7 +30,6 @@ namespace WebApplication1
     <meta charset='utf-8'/>
     <title>Main page</title>
     <link rel ='stylesheet' href='/Styles/Site.css'/>
-    {0}
 </head>
 <body>
     <header id='header_body'>
