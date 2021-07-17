@@ -9,54 +9,6 @@ var body = document.querySelector('body');
 body.onresize = body.onload = function (event) {
     resizebody();
 };
-function getCellValue(row, indexTh) {
-    return row.children[indexTh].innerText || row.children[indexTh].textContent;
-}
-function getComparer(indexTh, asc) {
-    function compareCells(v1, v2) {
-        if (v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2)) {
-            return v1 - v2;
-        }
-        return v1.toString().localeCompare(v2);
-    }
-    var comparer = function (a, b) {
-        return compareCells(getCellValue(asc ? a : b, indexTh), getCellValue(asc ? b : a, indexTh));
-    };
-    return comparer;
-}
-// Извлекает порядок сортировки из атрибута data-sort-order
-// и возвращает true  - если текущее значение сортировки "ascending"
-//              false - если "descending"
-//              undefined - "disabled" - сортировка запрещена.
-// Меняет значение сортировки на противоположное.
-// Сохраняет порядок сортировки для столбца в сессионном хранилище.
-function sortOrderFromTh(th) {
-    var sortOrder;
-    var resSortOrder;
-    var indexTh = Array.prototype.slice.call(th.parentNode.children).indexOf(th);
-    sortOrder = sessionStorage.getItem("Sort.Order.Th" + indexTh);
-    if (sortOrder == undefined || sortOrder == null) {
-        switch (th.dataset.sortOrder) {
-            case "none":
-            case "ascending":
-                resSortOrder = true;
-                th.dataset.sortOrder = "descending";
-                break;
-            case "descending":
-                resSortOrder = false;
-                th.dataset.sortOrder = "ascending";
-                break;
-            case "disabled":
-                return undefined;
-        }
-    }
-    else {
-        resSortOrder = (sortOrder === 'false');
-    }
-    sessionStorage.setItem("Sort.ThIndex", indexTh.toString());
-    sessionStorage.setItem("Sort.Order.Th" + indexTh, resSortOrder.toString());
-    return resSortOrder;
-}
 document.querySelectorAll('th')
     .forEach(function (th) { return th.addEventListener('click', (function () {
     var sortOrder = sortOrderFromTh(th);
@@ -76,31 +28,6 @@ addEventListener("beforeunload", function () {
     var scrollTop = String(document.getElementById("divTable").scrollTop);
     sessionStorage.setItem("currentScrollYPosition", scrollTop);
 }, false);
-function restoreScrollPosition() {
-    // Restore scroll position.
-    var scrollTop = (Number)(sessionStorage.getItem("currentScrollYPosition")), divScrollContainer = document.getElementById("divTable");
-    var indexTh = (Number)(sessionStorage.getItem("Sort.ThIndex"));
-    if (indexTh === undefined || indexTh === null) {
-        indexTh = 0;
-        sessionStorage.setItem("Sort.ThIndex", String(indexTh));
-        sessionStorage.setItem("Sort.Order.Th" + indexTh, String(true));
-    }
-    var so = sessionStorage.getItem("Sort.Order.Th" + indexTh);
-    var sortOrder = (so === undefined) ? undefined : so === 'true';
-    SortTable(sortOrder, divScrollContainer, indexTh);
-    if (scrollTop && divScrollContainer) {
-        divScrollContainer.scrollTop = scrollTop;
-    }
-}
-function SortTable(sortOrder, divScrollContainer, indexTh) {
-    if (sortOrder !== undefined) {
-        var table_1 = divScrollContainer.querySelector('table');
-        var tbody_1 = table_1.querySelector('tbody');
-        Array.prototype.slice.call(tbody_1.querySelectorAll('tr'))
-            .sort(getComparer(indexTh, sortOrder))
-            .forEach(function (tr) { return tbody_1.appendChild(tr); });
-    }
-}
 document.querySelector('table').onclick = function (event) {
     if (menuState !== 0) {
         return;
@@ -115,38 +42,6 @@ document.querySelector('table').onclick = function (event) {
     var paramName = currentTr.closest('table').getAttribute("data-parameter");
     window.location.href = createPathWithNewParameter(action, paramName, currentTr.id);
 };
-// Создание адреса с параметрами.
-function createPathWithNewParameter(action, param, value) {
-    var url = new URL(window.location.href);
-    var params = url.search;
-    if (params === "" || params === null || params === undefined) {
-        params = "?";
-    }
-    else {
-        params += "&";
-    }
-    return url.pathname.concat("/", action, params, param + "=" + value);
-}
-function resizebody() {
-    var container = document.getElementById("divTable");
-    var titleTable = document.getElementById("titleTable");
-    var g = document.getElementsByTagName('body')[0];
-    var availableHeight = document.documentElement.clientHeight; //|| g.clientHeight;
-    var headerOffset = document.getElementById("header_body").offsetHeight;
-    var footerOffset = document.getElementById("footer_body").offsetHeight;
-    var stt = getComputedStyle(titleTable);
-    var titleTableOffset = titleTable.offsetHeight;
-    var styleBody = getComputedStyle(g);
-    var containerHeight = (availableHeight - headerOffset - footerOffset - titleTableOffset
-        - parseInt(stt.paddingBottom)
-        - parseInt(stt.paddingTop)
-        - parseInt(styleBody.marginBottom)
-        - parseInt(styleBody.marginTop));
-    container.style.height = containerHeight + "px";
-    document.cookie = "containerHeight=" + containerHeight + "; path=/; max-age=10000";
-    restoreScrollPosition();
-    container.style.display = "block";
-}
 // Добавляет контекстное меню к строке таблицы.
 var menu = document.querySelector("#context-menu");
 var menuItems = menu.querySelectorAll(".context-menu__item");
@@ -158,6 +53,7 @@ var contextMenuClassName = "context-menu";
 var contextMenuItemClassName = "context-menu__item";
 var contextMenuLinkClassName = "context-menu__link";
 var contextMenuActive = "context-menu--active";
+var selectedTableRow = "selected-row";
 (function () {
     init();
     // Инициализация.
@@ -171,15 +67,20 @@ var contextMenuActive = "context-menu--active";
     // Если правый клик не на строке таблицы - скрывает.
     function contextListener() {
         document.addEventListener("contextmenu", function (e) {
-            taskItemInContext = clickInsideElement(e, taskItemClassName);
+            var newTaskItem = clickInsideElement(e, taskItemClassName);
+            if (newTaskItem !== taskItemInContext) {
+                // Происходит при клике правой кнопкой на строке таблицы.
+                toggleMenuOff();
+                taskItemInContext = newTaskItem;
+            }
             if (taskItemInContext) {
                 e.preventDefault();
                 toggleMenuOn();
                 positionMenu(e);
             }
             else {
-                taskItemInContext = null;
                 toggleMenuOff();
+                taskItemInContext = null;
             }
         });
     }
@@ -204,6 +105,7 @@ var contextMenuActive = "context-menu--active";
         if (menuState !== 1) {
             menuState = 1;
             menu.classList.add(contextMenuActive);
+            taskItemInContext.classList.add(selectedTableRow);
         }
     }
     // Скрывает меню.
@@ -211,6 +113,7 @@ var contextMenuActive = "context-menu--active";
         if (menuState !== 0) {
             menuState = 0;
             menu.classList.remove(contextMenuActive);
+            taskItemInContext.classList.remove(selectedTableRow);
         }
     }
     // Обработчик клика мыши.
@@ -234,7 +137,6 @@ var contextMenuActive = "context-menu--active";
     }
     function menuItemListener(link) {
         var currentTr = taskItemInContext;
-        var action = currentTr.getAttribute("data-action");
         var paramName = currentTr.closest("table").getAttribute("data-parameter");
         var path = createPathWithNewParameter(link.getAttribute("data-action"), paramName, currentTr.id);
         window.location.href = path;
@@ -312,4 +214,109 @@ var contextMenuActive = "context-menu--active";
         };
     }
 })();
-//# sourceMappingURL=HandlerTS.js.map
+function getCellValue(row, indexTh) {
+    return row.children[indexTh].innerText || row.children[indexTh].textContent;
+}
+function getComparer(indexTh, asc) {
+    function compareCells(v1, v2) {
+        if (v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2)) {
+            return v1 - v2;
+        }
+        return v1.toString().localeCompare(v2);
+    }
+    var comparer = function (a, b) {
+        return compareCells(getCellValue(asc ? a : b, indexTh), getCellValue(asc ? b : a, indexTh));
+    };
+    return comparer;
+}
+// Извлекает порядок сортировки из атрибута data-sort-order
+// и возвращает true  - если текущее значение сортировки "ascending"
+//              false - если "descending"
+//              undefined - "disabled" - сортировка запрещена.
+// Меняет значение сортировки на противоположное.
+// Сохраняет порядок сортировки для столбца в сессионном хранилище.
+function sortOrderFromTh(th) {
+    var sortOrder;
+    var resSortOrder;
+    var indexTh = Array.prototype.slice.call(th.parentNode.children).indexOf(th);
+    sortOrder = sessionStorage.getItem("Sort.Order.Th" + indexTh);
+    if (sortOrder == undefined || sortOrder == null) {
+        switch (th.dataset.sortOrder) {
+            case "none":
+            case "ascending":
+                resSortOrder = true;
+                th.dataset.sortOrder = "descending";
+                break;
+            case "descending":
+                resSortOrder = false;
+                th.dataset.sortOrder = "ascending";
+                break;
+            case "disabled":
+                return undefined;
+        }
+    }
+    else {
+        resSortOrder = (sortOrder === 'false');
+    }
+    sessionStorage.setItem("Sort.ThIndex", indexTh.toString());
+    sessionStorage.setItem("Sort.Order.Th" + indexTh, resSortOrder.toString());
+    return resSortOrder;
+}
+function restoreScrollPosition() {
+    // Restore scroll position.
+    var scrollTop = (Number)(sessionStorage.getItem("currentScrollYPosition")), divScrollContainer = document.getElementById("divTable");
+    var indexTh = (Number)(sessionStorage.getItem("Sort.ThIndex"));
+    if (indexTh === undefined || indexTh === null) {
+        indexTh = 0;
+        sessionStorage.setItem("Sort.ThIndex", String(indexTh));
+        sessionStorage.setItem("Sort.Order.Th" + indexTh, String(true));
+    }
+    var so = sessionStorage.getItem("Sort.Order.Th" + indexTh);
+    var sortOrder = (so === undefined) ? undefined : so === 'true';
+    SortTable(sortOrder, divScrollContainer, indexTh);
+    if (scrollTop && divScrollContainer) {
+        divScrollContainer.scrollTop = scrollTop;
+    }
+}
+function SortTable(sortOrder, divScrollContainer, indexTh) {
+    if (sortOrder !== undefined) {
+        var table_1 = divScrollContainer.querySelector('table');
+        var tbody_1 = table_1.querySelector('tbody');
+        Array.prototype.slice.call(tbody_1.querySelectorAll('tr'))
+            .sort(getComparer(indexTh, sortOrder))
+            .forEach(function (tr) { return tbody_1.appendChild(tr); });
+    }
+}
+// Создание адреса с параметрами.
+function createPathWithNewParameter(action, param, value) {
+    var url = new URL(window.location.href);
+    var params = url.search;
+    if (params === "" || params === null || params === undefined) {
+        params = "?";
+    }
+    else {
+        params += "&";
+    }
+    return url.pathname.concat("/", action, params, param + "=" + value);
+}
+function resizebody() {
+    var container = document.getElementById("divTable");
+    var titleTable = document.getElementById("titleTable");
+    var g = document.getElementsByTagName('body')[0];
+    var availableHeight = document.documentElement.clientHeight; //|| g.clientHeight;
+    var headerOffset = document.getElementById("header_body").offsetHeight;
+    var footerOffset = document.getElementById("footer_body").offsetHeight;
+    var stt = getComputedStyle(titleTable);
+    var titleTableOffset = titleTable.offsetHeight;
+    var styleBody = getComputedStyle(g);
+    var containerHeight = (availableHeight - headerOffset - footerOffset - titleTableOffset
+        - parseInt(stt.paddingBottom)
+        - parseInt(stt.paddingTop)
+        - parseInt(styleBody.marginBottom)
+        - parseInt(styleBody.marginTop));
+    container.style.height = containerHeight + "px";
+    document.cookie = "containerHeight=" + containerHeight + "; path=/; max-age=10000";
+    restoreScrollPosition();
+    container.style.display = "block";
+}
+//# sourceMappingURL=Scripts.js.map

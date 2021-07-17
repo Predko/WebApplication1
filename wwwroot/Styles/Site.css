@@ -17,12 +17,12 @@ nav {
     }
 
 .menu-item-link:hover {
-    background-color: aquamarine;
+    background-color: rgb(135, 222, 193);
 }
 
 .menu-item {
     /* float: left; */
-    background-color: lightgray;
+    background-color: #eee;
     color: black;
     display: inline-block;
 }
@@ -92,9 +92,16 @@ tr:nth-child(odd) {
 }
 
 tbody tr:hover {
-    background-color: burlywood;
+    background-color: rgb(135, 222, 193);
 }
 
+tbody .selected-row {
+    background-color: rgb(213, 222, 135);
+}
+
+tbody .selected-row:hover {
+    background-color: rgb(226, 228, 129);
+}
 
 #h1ListEntities {
     margin-bottom: 0px;

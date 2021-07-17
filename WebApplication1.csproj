@@ -5,7 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\HandlerTS.js" />
+    <Content Remove="wwwroot\js\HandlerTS.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="HandlerTS.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Remove="wwwroot\js\HandlerTS.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,8 +31,6 @@
     <None Include="wwwroot\Data\Customers.sqlite">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="wwwroot\js\HandlerTS.js" />
-    <None Include="wwwroot\js\HandlerTS.js.map" />
   </ItemGroup>
 
 </Project>

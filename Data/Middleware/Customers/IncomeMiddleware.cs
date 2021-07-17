@@ -108,12 +108,23 @@ namespace WebApplication1.Data.Middleware.Customers
                                                 columns[1],
                                                 columns[2]));
             }
-            
+
             StringBuilder response = new StringBuilder(Startup.BeginHtmlPages)
                     .Append("<main>")
-                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список поступлений{NameCustomer}</h1></div>")
-                    .Append("<div style='overflow-y:auto' id='divTable'>")
-                    .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
+                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список поступлений{NameCustomer}</h1></div>");
+
+            string containerHeight = context.Request.Cookies["containerHeight"];
+
+            if (containerHeight != null)
+            {
+                response.Append($"<div style='overflow-y:auto' id='divTable' style='height:{containerHeight}px'>");
+            }
+            else
+            {
+                response.Append($"<div style='overflow-y:auto' id='divTable'>");
+            }
+            
+            response.Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
                     .Append($"<th width={maxLength[0]}em data-sort-order='ascending'>Дата</th>")
                     .Append($"<th width={maxLength[0]}em data-sort-order='ascending'>Номер</th>")
                     .Append("<th data-sort-order='ascending'>Сумма</th>")
@@ -122,7 +133,7 @@ namespace WebApplication1.Data.Middleware.Customers
                     .Append("</table></div></main>")
                     .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
-                    .Append("<script src='/js/HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
+                    .Append("<script src='/js/Scripts.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
 
             await context.Response.WriteAsync(response.ToString());
 
