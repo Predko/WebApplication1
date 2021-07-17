@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
+using System.IO;
+using System.Buffers;
 
 namespace WebApplication1.Data.Middleware.Customers
 {
@@ -81,7 +84,26 @@ namespace WebApplication1.Data.Middleware.Customers
             public string Build() => menu.Append(contextMenuEnd).ToString();
         }
 
+
+
         private delegate Task<bool> ShowDelegate(HttpContext context, int entityParent, int entityChild);
+
+        public class Param
+        {
+            public string Name { get; set; }
+            public string Value { get; set; }
+
+            public Param(string jsonString)
+            {
+                var sa = jsonString.Trim('{', '}').Split(':');
+
+                Name = sa[0]?.Trim();
+                Value = sa[1]?.Trim();
+            }
+
+        }
+
+        protected List<Param> listParams;
 
         /// <summary>
         /// Обработчик компонента Middleware.
@@ -120,7 +142,7 @@ namespace WebApplication1.Data.Middleware.Customers
             string GetParameter(string nameParam) => (context.Request.Method == "GET") ? context.Request.Query[nameParam]
                                                                                        : context.Request.Form[nameParam + "Id"];
             //-------
-            
+
             context.Response.ContentType = "text/html;charset=utf-8";
 
             string customer_Id = GetParameter(CustomerEntityName);
@@ -130,15 +152,11 @@ namespace WebApplication1.Data.Middleware.Customers
                 customerId = -1;
             }
 
-            string entity_Id;
+            string entity_Id = "";
 
             if (EntityName != null)
             {
                 entity_Id = GetParameter(EntityName);
-            }
-            else
-            {
-                entity_Id = "";
             }
 
             if (string.IsNullOrWhiteSpace(entity_Id) == true || int.TryParse(entity_Id, out int entityId) == false)
@@ -151,7 +169,7 @@ namespace WebApplication1.Data.Middleware.Customers
             if (ShowPage != null)
             {
                 error = await ShowPage(context, customerId, entityId);
-                
+
                 if (!error)
                 {
                     // была ошибка и она необработана.

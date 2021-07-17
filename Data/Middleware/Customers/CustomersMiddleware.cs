@@ -65,21 +65,6 @@ namespace WebApplication1.Data.Middleware.Customers
         /// <returns>false if an error is occured, otherwise - true</returns>
         protected override async Task<bool> ShowListOfEntities(HttpContext context, int p1, int p2)
         {
-            StringBuilder response = new StringBuilder(Startup.BeginHtmlPages)
-                    .Append("<main>")
-                    .Append($"<div id='titleTable'><h1 id='h1ListEntities'> Список клиентов </h1></div>");
-
-            string containerHeight = context.Request.Cookies["containerHeight"];
-
-            if (containerHeight != null)
-            {
-                response.Append($"<div style='overflow-y:auto' id='divTable' style='height:{containerHeight}px'>");
-            }
-            else
-            {
-                response.Append($"<div style='overflow-y:auto' id='divTable'>");
-            }
-
             DataView dataViewTable;
 
             try
@@ -88,9 +73,7 @@ namespace WebApplication1.Data.Middleware.Customers
             }
             catch (SqliteException ex)
             {
-                response.Clear().Append(ex.Message);
-
-                await context.Response.WriteAsync(response.ToString());
+                await context.Response.WriteAsync(ex.Message);
 
                 return true;
             }
@@ -115,16 +98,27 @@ namespace WebApplication1.Data.Middleware.Customers
                                                 unp ?? "",
                                                 nameCompany));
             }
+            
+            StringBuilder response = new StringBuilder($"<div id='titleTable'><h1 id='h1ListEntities'>Список клиентов</h1></div>");
+
+            string containerHeight = context.Request.Cookies["containerHeight"];
+
+            if (containerHeight != null)
+            {
+                response.Append($"<div style='overflow-y:auto' id='divTable' style='height:{containerHeight}px'>");
+            }
+            else
+            {
+                response.Append($"<div style='overflow-y:auto' id='divTable'>");
+            }
 
             response.Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
                     .Append($"<th width={maxlength[0]}ex data-sort-order='ascending'>УНП</th>")
                     .Append($"<th data-sort-order='ascending'>Название организации</th>")   //  width={columnsWidth[1]}%
                     .Append("</tr></thead>")
                     .Append(tbody).Append("</tbody>")
-                    .Append("</table></div></main>")
-                    .Append(ContextMenu)
-                    .Append(Startup.EndHtmlPages)
-                    .Append("<script src='/js/Scripts.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
+                    .Append("</table></div>")
+                    .Append(ContextMenu);
 
             await context.Response.WriteAsync(response.ToString());
 
@@ -144,8 +138,7 @@ namespace WebApplication1.Data.Middleware.Customers
             DataTable dataTable = Storage[TableName, $"SELECT * FROM Customers WHERE Id='{customerId}'"];
             DataRow row = dataTable.Rows[0];
 
-            StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
-                                                       "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
+            StringBuilder response = new(Startup.BeginHtmlPages);
 
             if (row == null)
             {
@@ -154,7 +147,7 @@ namespace WebApplication1.Data.Middleware.Customers
             }
             else
             {
-                response.Append($"<main><h1>Подробные данные клиента</h1>")
+                response.Append($"<main id='main-container'><h1>Подробные данные клиента</h1>")
                         .Append($"<form id='formId'>")
                         .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}'/>")
 

@@ -116,7 +116,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
             StringBuilder response = new StringBuilder()
                     .Append(Startup.BeginHtmlPages)
-                    .Append("<main>")
+                    .Append("<main id='main-container'>")
                     .Append($"<div id='titleTable'><h1 id='h1ListEntities'>Список договоров{NameCustomer}</h1></div>")
                     .Append("<div style='overflow-y:auto' id='divTable'>")
                     .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")

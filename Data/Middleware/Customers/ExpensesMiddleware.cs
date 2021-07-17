@@ -62,6 +62,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
             dataViewTable.Sort = dataViewTable.Table.Columns[2].ColumnName; // Date
 
+            StringBuilder responsePOST = new StringBuilder();
             StringBuilder tbody = new("<tbody>");
 
             const int columnsNumber = 3;
@@ -86,9 +87,7 @@ namespace WebApplication1.Data.Middleware.Customers
                                                 columns[2]));
             }
 
-            StringBuilder response = new StringBuilder(Startup.BeginHtmlPages)
-                    .Append("<main>")
-                    .Append("<div id='titleTable'><h1 id='h1ListEntities'>Список платежей</h1></div>")
+            responsePOST.Append("<div id='titleTable'><h1 id='h1ListEntities'>Список платежей</h1></div>")
                     .Append("<div style='overflow-y:auto' id='divTable'>")
                     .Append($"<table id='list-entities' data-parameter='{EntityName}'><thead><tr>")
                     .Append($"<th width={maxLength[0]}ex data-sort-order='ascending'>Дата</th>")
@@ -96,12 +95,10 @@ namespace WebApplication1.Data.Middleware.Customers
                     .Append($"<th data-sort-order='ascending'>Сумма</th>")
                     .Append("</tr></thead>")
                     .Append(tbody).Append("</tbody>")
-                    .Append("</tbody></table></div></main>")
-                    .Append(ContextMenu)
-                    .Append(Startup.EndHtmlPages)
-                    .Append("<script src='/js/Scripts.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
+                    .Append("</tbody></table></div>")
+                    .Append(ContextMenu);
 
-            await context.Response.WriteAsync(response.ToString());
+            await context.Response.WriteAsync(responsePOST.ToString());
 
             return true;
         }

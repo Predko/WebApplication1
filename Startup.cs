@@ -15,6 +15,7 @@ using System.Text;
 using System.Data;
 using WebApplication1.Data;
 using WebApplication1.Data.Middleware;
+using System.Text.Encodings.Web;
 
 namespace WebApplication1
 {
@@ -62,6 +63,13 @@ namespace WebApplication1
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers(options =>
+            {
+            }).AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.Encoder = JavaScriptEncoder.Default;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
