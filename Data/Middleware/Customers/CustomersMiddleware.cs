@@ -124,7 +124,7 @@ namespace WebApplication1.Data.Middleware.Customers
                     .Append("</table></div></main>")
                     .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
-                    .Append("<script src='/js/HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
+                    .Append("<script src='/js/Scripts.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
 
             await context.Response.WriteAsync(response.ToString());
 
@@ -155,8 +155,7 @@ namespace WebApplication1.Data.Middleware.Customers
             else
             {
                 response.Append($"<main><h1>Подробные данные клиента</h1>")
-                        .Append($"<form method='POST' id='formId'>")
-                        //.Append($"<form method='post' action='{EditEntity}/submit' id='formId'>")
+                        .Append($"<form id='formId'>")
                         .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}'/>")
 
                         .Append("<table><tbody>");

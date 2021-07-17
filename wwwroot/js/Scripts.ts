@@ -234,6 +234,7 @@ const contextMenuClassName = "context-menu";
 const contextMenuItemClassName = "context-menu__item";
 const contextMenuLinkClassName = "context-menu__link";
 const contextMenuActive = "context-menu--active";
+const selectedTableRow = "selected-row";
 
 (function ()
 {
@@ -254,7 +255,15 @@ const contextMenuActive = "context-menu--active";
     {
         document.addEventListener("contextmenu", function (e)
         {
-            taskItemInContext = <HTMLTableRowElement>clickInsideElement(e, taskItemClassName);
+            const newTaskItem = <HTMLTableRowElement>clickInsideElement(e, taskItemClassName);
+
+            if (newTaskItem !== taskItemInContext)
+            {
+                // Происходит при клике правой кнопкой на строке таблицы.
+                toggleMenuOff();
+
+                taskItemInContext = newTaskItem;
+            }
 
             if (taskItemInContext)
             {
@@ -265,8 +274,8 @@ const contextMenuActive = "context-menu--active";
             }
             else
             {
-                taskItemInContext = null;
                 toggleMenuOff();
+                taskItemInContext = null;
             }
         });
     }
@@ -302,6 +311,7 @@ const contextMenuActive = "context-menu--active";
         {
             menuState = 1;
             menu.classList.add(contextMenuActive);
+            taskItemInContext.classList.add(selectedTableRow);
         }
     }
 
@@ -312,6 +322,7 @@ const contextMenuActive = "context-menu--active";
         {
             menuState = 0;
             menu.classList.remove(contextMenuActive);
+            taskItemInContext.classList.remove(selectedTableRow);
         }
     }
 

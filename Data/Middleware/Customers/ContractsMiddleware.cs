@@ -131,7 +131,7 @@ namespace WebApplication1.Data.Middleware.Customers
                     .Append("</table></div></main>")
                     .Append(ContextMenu)
                     .Append(Startup.EndHtmlPages)
-                    .Append("<script src='/js/HandlerTS.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
+                    .Append("<script src='/js/Scripts.js'></script><html>");   // <script src=""js\scripts.js"" type=""text/javascript""></script>
 
             await context.Response.WriteAsync(response.ToString());
 
