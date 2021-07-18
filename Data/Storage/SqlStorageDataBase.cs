@@ -2,6 +2,7 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace StorageDatabaseNameSpace
 {
@@ -54,6 +55,37 @@ namespace StorageDatabaseNameSpace
             }
 
             return dataAdapter.Fill(dataSet.Tables[nameTable]);
+        }
+
+        public override int DeleteRecords(DataTable dt)
+        {
+            StringBuilder selectString = new($"DELETE FROM {dt.TableName} WHERE");
+
+            string pk = dt.PrimaryKey[0].ColumnName;
+            string orString = " OR";
+
+            foreach (DataRow row in dt.Rows)
+            {
+                selectString.Append($"{pk} = {row[pk]}{orString}");
+                
+                row.Delete();
+            }
+
+            selectString.Remove(selectString.Length - orString.Length, orString.Length);
+
+            selectString.Append(';');
+
+            SqlConnection sqlConnection = new(ConnectionString);
+
+            SqlCommand command = new SqlCommand(selectString.ToString(), sqlConnection);
+
+            sqlConnection.Open();
+
+            int count = command.ExecuteNonQuery();
+
+            sqlConnection.Close();
+
+            return count;
         }
     }
 }

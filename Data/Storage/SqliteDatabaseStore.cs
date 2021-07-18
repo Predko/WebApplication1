@@ -21,16 +21,22 @@ namespace StorageDatabaseNameSpace
 
         public override int UpdateDataTable(string nameTable, string queryString = null)
         {
-            DataTable dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Added);
+            DataTable dt = dataSet.Tables[nameTable];
+
+            if (dt == null)
+            {
+                return 0;
+            }
+
+            var rows = dt.Select(null, null, DataViewRowState.Added);
 
             int count = 0;
 
-            if (dt != null)
+            if (rows.Length != 0)
             {
                 ColumnsAndValuesInfo columnsAndValues = new(dt);
 
-                dt.TableName = nameTable;
-                count = ExecuteInsertCommand(dt, columnsAndValues);
+                count = ExecuteInsertCommand(rows, dt.TableName, columnsAndValues);
             }
 
             dt = dataSet.Tables[nameTable]?.GetChanges(DataRowState.Modified);
@@ -58,9 +64,9 @@ namespace StorageDatabaseNameSpace
             return count;
         }
 
-        private int ExecuteInsertCommand(DataTable dt, ColumnsAndValuesInfo columnsAndValues)
+        private int ExecuteInsertCommand(DataRow[] rows, string tableName, ColumnsAndValuesInfo columnsAndValues)
         {
-            string commandString = GenerateInsertCommand(dt.TableName, columnsAndValues);
+            string commandString = GenerateInsertCommand(tableName, columnsAndValues);
 
             using SqliteConnection connection = new(ConnectionString);
 
@@ -70,7 +76,7 @@ namespace StorageDatabaseNameSpace
 
             int count = 0;
 
-            foreach (DataRow row in dt.Rows)
+            foreach (DataRow row in rows)
             {
                 command.CommandText = string.Format(commandString, columnsAndValues.AllValuesExceptId(row));
 
@@ -130,6 +136,15 @@ namespace StorageDatabaseNameSpace
             }
 
             connection.Close();
+
+            return count;
+        }
+
+        public override int DeleteRecords(DataTable dt)
+        {
+            ColumnsAndValuesInfo columnsAndValues = new(dt);
+
+            int count = ExecuteDeleteCommand(dt, columnsAndValues);
 
             return count;
         }

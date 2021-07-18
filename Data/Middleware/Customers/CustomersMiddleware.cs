@@ -25,7 +25,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
         protected override string EditEntity { get => "/customers/edit"; }
 
-        protected override string DeleteEntity { get => "/customers/delete"; }
+        protected override string DeleteEntity { get => "/customers/remove"; }
 
         protected override string NewEntity { get => "/customers/new"; }
 
@@ -54,7 +54,7 @@ namespace WebApplication1.Data.Middleware.Customers
                 .Append("contracts", "Список договоров")
                 .Append("income", "Оплата договоров")
                 .Append("new", "Добавить нового клиента")
-                .Append("delete", "Удалить клиента")
+                .Append("remove", "Удалить клиента")
                 .Build();
         }
 
@@ -211,15 +211,23 @@ namespace WebApplication1.Data.Middleware.Customers
             return response;
         }
 
-        //protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int incomeId)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int incomeId)
+        {
+            DataTable dataTable;
 
-        //protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            // Обновить старую.
+            dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
+
+            string nameCompany = (string)dataTable.Rows[0]["NameCompany"];
+
+            Storage.DeleteRecords(dataTable);
+
+            dataTable.AcceptChanges();
+
+            context.Response.Redirect(ListEntities);
+
+            return await ShowListOfEntities(context, -1, -1);
+        }
 
         protected override async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int p2)
         {
@@ -264,10 +272,20 @@ namespace WebApplication1.Data.Middleware.Customers
 
             Storage.UpdateDataTable("Customers");
 
+            string message; 
+            if (customerId == -1)
+            {
+                message = $"Клиент {row["NameCompany"]} добавлен успешно";
+            }
+            else
+            {
+                message = $"Данные клиента {row["NameCompany"]} обновлены успешно";
+            }
+
             context.Response.StatusCode = StatusCodes.Status202Accepted;
             context.Response.ContentType = "application/text; charset=UTF-8";
 
-            await context.Response.WriteAsync($"Данные для клиента с id = {customerId} обновлены успешно");
+            await context.Response.WriteAsync(message);
 
             return true;
         }

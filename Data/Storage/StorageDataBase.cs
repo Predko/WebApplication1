@@ -66,5 +66,7 @@ namespace StorageDatabaseNameSpace
                                     await Task.Run(() => LoadDataTable(nameTable, queryString));
 
         public virtual void AcceptChanges(string nameTable) => this[nameTable].AcceptChanges();
+
+        public abstract int DeleteRecords(DataTable dt);
     }
 }

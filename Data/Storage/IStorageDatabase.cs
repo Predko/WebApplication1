@@ -69,5 +69,7 @@ namespace StorageDatabaseNameSpace
         /// <returns>Количество записей.</returns>
         public Task<int> LoadDataTableAsync(string nameTable, string queryString = null);
 
+        public int DeleteRecords(DataTable dt);
+
     }
 }
