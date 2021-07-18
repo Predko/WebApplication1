@@ -20,7 +20,7 @@ function submitForm()
     // Define what happens on successful data submission
     XHR.addEventListener("load", function (event)
     {
-        alert(XHR.response);
+        prompt(XHR.response);
     });
 
     // Define what happens in case of error
@@ -36,7 +36,7 @@ function submitForm()
     XHR.send(FD);
 }
 
-    // XHR.onprogress = function (event)
+// XHR.onprogress = function (event)
     // {
     //     if (event.lengthComputable)
     //     {

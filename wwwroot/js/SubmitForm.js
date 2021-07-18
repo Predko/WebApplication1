@@ -11,7 +11,7 @@ function submitForm() {
     var FD = new FormData(form);
     // Define what happens on successful data submission
     XHR.addEventListener("load", function (event) {
-        alert(XHR.response);
+        prompt(XHR.response);
     });
     // Define what happens in case of error
     XHR.addEventListener("error", function (event) {

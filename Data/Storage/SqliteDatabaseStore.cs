@@ -72,9 +72,12 @@ namespace StorageDatabaseNameSpace
 
             foreach (DataRow row in dt.Rows)
             {
-                command.CommandText = string.Format(commandString, columnsAndValues.AllValues(row));
+                command.CommandText = string.Format(commandString, columnsAndValues.AllValuesExceptId(row));
 
-                count += command.ExecuteNonQuery();
+                row["Id"] = (long)command.ExecuteScalar();
+
+                count++;
+
             }
 
             connection.Close();
@@ -137,22 +140,27 @@ namespace StorageDatabaseNameSpace
 
             // Create sets list.
 
-            foreach (string name in columnsAndValues.AllColumns)
+            StringBuilder param = new("VALUES(");
+
+            int i = 0;
+
+            foreach (string name in columnsAndValues.AllColumnsExceptId)
             {
-                lc.Append(name).Append(',');
+                if (name.ToLower() != "id")
+                {
+                    lc.Append(name).Append(',');
+                    param.Append($"'{{{i}}}',");
+                    i++;
+                }
             }
 
-            lc.Remove(lc.Length - 1, 1);
+            // Remove last ','
+            lc.Remove(lc.Length - 1, 1).Append(") \n");
+            
+            param.Remove(param.Length - 1, 1).Append("); \n" +
+                "SELECT last_insert_rowid();\n");
 
-            lc.Append("\nVALUES(");
-
-            for (int i = 0; i != columnsAndValues.Count; i++)
-            {
-                lc.Append($"'{{{i}}},");
-            }
-
-            // Remove last 'AND'
-            lc.Remove(lc.Length - 1, 1).Append(");\n");
+            lc.Append(param);
 
             return lc.ToString();
         }

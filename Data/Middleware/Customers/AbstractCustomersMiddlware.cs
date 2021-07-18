@@ -2,6 +2,7 @@
 using StorageDatabaseNameSpace;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -150,13 +151,13 @@ namespace WebApplication1.Data.Middleware.Customers
 
             if (ShowPage != null)
             {
-                error = await ShowPage(context, customerId, entityId);
-                
-                if (!error)
+                try
                 {
-                    // была ошибка и она необработана.
-
-                    await context.Response.WriteAsync(RequestFailed);
+                    error = await ShowPage(context, customerId, entityId);
+                }
+                catch(Exception ex)
+                {
+                    await context.Response.WriteAsync(ex.Message);
                 }
 
                 return;

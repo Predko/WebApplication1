@@ -106,7 +106,7 @@ namespace WebApplication1.Data.Middleware.Customers
             {
                 string unp = row["UNP"] as string;
                 string nameCompany = ((string)row["NameCompany"]);
-                
+
                 maxlength[0] = unp.Length > maxlength[0] ? unp.Length : maxlength[0];
                 maxlength[1] = nameCompany.Length > maxlength[1] ? nameCompany.Length : maxlength[1];
 
@@ -144,6 +144,36 @@ namespace WebApplication1.Data.Middleware.Customers
             DataTable dataTable = Storage[TableName, $"SELECT * FROM Customers WHERE Id='{customerId}'"];
             DataRow row = dataTable.Rows[0];
 
+            StringBuilder response = GetEditEntityString(dataTable, row, "edit-customer", "Подробные данные клиента");
+
+            await context.Response.WriteAsync(response.ToString());
+
+            return true;
+        }
+
+        protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int entityId)
+        {
+            DataTable dataTable = Storage[TableName, $"SELECT * FROM Customers LIMIT 1"];
+            DataRow newRow = dataTable.NewRow();
+
+            newRow["Id"] = -1;
+
+            StringBuilder response = GetEditEntityString(dataTable, newRow, "new-customer", "Новый клиент");
+
+            await context.Response.WriteAsync(response.ToString());
+
+            return true;
+        }
+
+        /// <summary>
+        /// Возвращает разметку редактирования указанной в строке
+        /// таблицы базы данных записи.
+        /// </summary>
+        /// <param name="dataTable">Таблица данных.</param>
+        /// <param name="row">Строка для редактирования.</param>
+        /// <returns></returns>
+        private StringBuilder GetEditEntityString(DataTable dataTable, DataRow row, string className, string header)
+        {
             StringBuilder response = new(string.Format(Startup.BeginHtmlPages,
                                                        "<link rel = \"stylesheet\" href= \"/Styles/Customers.css\" />"));
 
@@ -156,14 +186,13 @@ namespace WebApplication1.Data.Middleware.Customers
             {
                 response.Append($"<main><h1>Подробные данные клиента</h1>")
                         .Append($"<form method='POST' id='formId'>")
-                        //.Append($"<form method='post' action='{EditEntity}/submit' id='formId'>")
-                        .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}'/>")
+                        .Append($"<input type='hidden' name='{CustomerEntityName}Id' value='{row["Id"]}' class='{className}'/>")
 
                         .Append("<table><tbody>");
 
                 var columns = dataTable.Columns;
 
-                for (int i = 1; i != row.ItemArray.Count(); i++)
+                for (int i = 1; i != row.ItemArray.Length; i++)
                 {
                     response.Append($"<tr><td><label>{columnNames[i]}</label></td>")
                             .Append($"<td><input name='{columns[i].ColumnName}' value='{row[i]}'/></td></tr>");
@@ -176,12 +205,10 @@ namespace WebApplication1.Data.Middleware.Customers
 
                         .Append("</form>")
                         .Append("</main>")
-                        .Append(Startup.EndHtmlPages ).Append("<script src='/js/SubmitForm.js'></script><html>");
+                        .Append(Startup.EndHtmlPages).Append("<script src='/js/SubmitForm.js'></script><html>");
             }
 
-            await context.Response.WriteAsync(response.ToString());
-
-            return true;
+            return response;
         }
 
         //protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int incomeId)
@@ -196,30 +223,44 @@ namespace WebApplication1.Data.Middleware.Customers
 
         protected override async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int p2)
         {
+            DataTable dataTable;
+            DataRow row;
+
             if (customerId == -1)
             {
-                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                
-                await context.Response.WriteAsync("Ошибка запроса. Отсутствует Id клиента");
+                // Добавить новую запись.
+                dataTable = Storage["Customers", $"SELECT * FROM Customers LIMIT 1"];
 
-                return true;
+                row = dataTable.NewRow();
+            }
+            else
+            {
+                // Обновить старую.
+                dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
+
+                row = dataTable.Rows[0];
             }
 
             var formValues = context.Request.Form.Select(e => e.Value).ToArray();
-
-            DataTable dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
-            DataRow row = dataTable.Rows[0];
 
             row.BeginEdit();
 
             for (int i = 1; i != row.ItemArray.Count(); i++)
             {
-                Type t = row.ItemArray[i].GetType();
+                Type type = dataTable.Columns[i].DataType;
 
-                row[i] = GetRowValueFromString(row.ItemArray[i].GetType(), formValues[i]);
+                row[i] = GetRowValueFromString(type, formValues[i]);
             }
 
             row.EndEdit();
+
+            if (customerId == -1)
+            {
+                // Добавляем новую запись.
+                row["Id"] = -1;
+
+                dataTable.Rows.Add(row);
+            }
 
             Storage.UpdateDataTable("Customers");
 
@@ -231,7 +272,7 @@ namespace WebApplication1.Data.Middleware.Customers
             return true;
         }
 
-    private object GetRowValueFromString(Type type, string value)
+        private object GetRowValueFromString(Type type, string value)
         {
             if (type == typeof(int))
             {

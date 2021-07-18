@@ -16,8 +16,6 @@ namespace StorageDatabaseNameSpace
 
         protected string connectionString;
 
-        protected Dictionary<string, string> lastQueryString = new();
-
         protected string SelectAllQueryString = "SELECT * FROM";
 
         public string ConnectionString { get => connectionString; set => connectionString = value; }
@@ -41,12 +39,8 @@ namespace StorageDatabaseNameSpace
             {
                 string selectAll = SelectAllQueryString + $" {name}";
 
-                if (dataSet.Tables.Contains(name) == false || lastQueryString.GetValueOrDefault(name, "") != selectAll)
-                {
-                    LoadDataTable(name, selectAll);
+                LoadDataTable(name, selectAll);
 
-                    lastQueryString[name] = selectAll;
-                }
                 return dataSet.Tables[name];
             }
         }
@@ -55,12 +49,7 @@ namespace StorageDatabaseNameSpace
         {
             get
             {
-                if (dataSet.Tables.Contains(name) == false || queryString != lastQueryString.GetValueOrDefault(name, ""))
-                {
-                    LoadDataTable(name, queryString);
-
-                    lastQueryString[name] = queryString;
-                }
+                LoadDataTable(name, queryString);
 
                 return dataSet.Tables[name];
             }
@@ -68,12 +57,12 @@ namespace StorageDatabaseNameSpace
 
         public abstract int UpdateDataTable(string nameTable, string queryString = null);
 
-        public virtual async Task<int> UpdateDataTableAsync(string nameTable, string queryString = null) => 
+        public virtual async Task<int> UpdateDataTableAsync(string nameTable, string queryString = null) =>
                                     await Task.Run(() => UpdateDataTable(nameTable, queryString));
 
         public abstract int LoadDataTable(string nameTable, string queryString = null);
 
-        public virtual async Task<int> LoadDataTableAsync(string nameTable, string queryString = null) => 
+        public virtual async Task<int> LoadDataTableAsync(string nameTable, string queryString = null) =>
                                     await Task.Run(() => LoadDataTable(nameTable, queryString));
 
         public virtual void AcceptChanges(string nameTable) => this[nameTable].AcceptChanges();

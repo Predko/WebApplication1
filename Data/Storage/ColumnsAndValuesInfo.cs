@@ -14,7 +14,7 @@ namespace StorageDatabaseNameSpace
             public List<string> ColumnsNames = new();
 
             // Columns.
-            public string[] AllColumns { get; private set; }
+            public string[] AllColumnsExceptId { get; private set; }
 
             public string[] ColumnsNotPrimaryKey { get; private set; }
 
@@ -33,7 +33,7 @@ namespace StorageDatabaseNameSpace
 
                 Count = dt.Columns.Count;
 
-                AllColumns = ColumnsNames.ToArray();
+                AllColumnsExceptId = ColumnsNames.ToArray();
 
                 ColumnsNotPrimaryKey = ColumnsNames.Where((o, i) => !IndexesPrimaryKey.Contains(i)).Select(c => c).ToArray();
                 
@@ -44,7 +44,10 @@ namespace StorageDatabaseNameSpace
             public string[] AllValues(DataRow row) => row.ItemArray.Select(v => v.ToString()).ToArray();
 
             public string[] ValuesNotPrimaryKey(DataRow row) => row.ItemArray.Where((o, i) => !IndexesPrimaryKey.Contains(i))
-                                                                                 .Select(v => v.ToString()).ToArray();
+                                                                             .Select(v => v.ToString()).ToArray();
+
+            public string[] AllValuesExceptId(DataRow row) => row.ItemArray.Where((o,i) => ColumnsNames[i].ToLower() != "id")
+                                                                           .Select(v => v.ToString()).ToArray();
 
             public string[] PrimaryKeyValues(DataRow row) => row.ItemArray.Where((o, i) => IndexesPrimaryKey.Contains(i))
                                                                     .Select(v => v.ToString()).ToArray();
