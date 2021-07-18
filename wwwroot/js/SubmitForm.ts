@@ -20,7 +20,7 @@ function submitForm()
     // Define what happens on successful data submission
     XHR.addEventListener("load", function (event)
     {
-        prompt(XHR.response);
+        alert(XHR.response);
     });
 
     // Define what happens in case of error

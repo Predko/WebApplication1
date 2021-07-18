@@ -149,15 +149,21 @@ namespace WebApplication1.Data.Middleware.Customers
             return true;
         }
 
-        //protected override async Task<bool> ShowListOfEntities(HttpContext context, int id, int p2)
-        //{
-        //    await context.Response.WriteAsync("Список договоров"); return true;
-        //}
+        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int contractId)
+        {
+            DataTable dataTable;
 
-        //protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int contractId)
-        //{
-        //    await context.Response.WriteAsync("Редактирование договора с id = " + contractId + ", клиента с id = " + customerId);
-        //}
+            // Обновить старую.
+            dataTable = Storage[TableName, $"SELECT * FROM {TableName} WHERE Id='{contractId}'"];
+
+            Storage.DeleteRecords(dataTable);
+
+            dataTable.AcceptChanges();
+
+            context.Response.Redirect(ListEntities);
+
+            return await ShowListOfEntities(context, -1, -1);
+        }
 
         //protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)
         //{

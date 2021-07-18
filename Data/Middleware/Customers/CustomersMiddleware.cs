@@ -141,7 +141,7 @@ namespace WebApplication1.Data.Middleware.Customers
         /// <returns>False if an error is occured, otherwise - true</returns>
         protected override async Task<bool> ShowEditEntity(HttpContext context, int customerId, int entityId)
         {
-            DataTable dataTable = Storage[TableName, $"SELECT * FROM Customers WHERE Id='{customerId}'"];
+            DataTable dataTable = Storage[TableName, $"SELECT * FROM {TableName} WHERE Id='{customerId}'"];
             DataRow row = dataTable.Rows[0];
 
             StringBuilder response = GetEditEntityString(dataTable, row, "edit-customer", "Подробные данные клиента");
@@ -153,7 +153,7 @@ namespace WebApplication1.Data.Middleware.Customers
 
         protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int entityId)
         {
-            DataTable dataTable = Storage[TableName, $"SELECT * FROM Customers LIMIT 1"];
+            DataTable dataTable = Storage[TableName, $"SELECT * FROM {TableName} LIMIT 1"];
             DataRow newRow = dataTable.NewRow();
 
             newRow["Id"] = -1;
@@ -216,9 +216,7 @@ namespace WebApplication1.Data.Middleware.Customers
             DataTable dataTable;
 
             // Обновить старую.
-            dataTable = Storage["Customers", $"SELECT * FROM Customers WHERE Id='{customerId}'"];
-
-            string nameCompany = (string)dataTable.Rows[0]["NameCompany"];
+            dataTable = Storage["Customers", $"SELECT * FROM {TableName} WHERE Id='{customerId}'"];
 
             Storage.DeleteRecords(dataTable);
 

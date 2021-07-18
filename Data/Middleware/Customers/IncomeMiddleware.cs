@@ -139,17 +139,24 @@ namespace WebApplication1.Data.Middleware.Customers
 
             return true;
         }
-        //protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId)
-        //{
-        //    throw new NotImplementedException(); return true;
-        //}
+
+        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int incomeId)
+        {
+            DataTable dataTable;
+
+            // Обновить старую.
+            dataTable = Storage[TableName, $"SELECT * FROM {TableName} WHERE Id='{incomeId}'"];
+
+            Storage.DeleteRecords(dataTable);
+
+            dataTable.AcceptChanges();
+
+            context.Response.Redirect(ListEntities);
+
+            return await ShowListOfEntities(context, -1, -1);
+        }
 
         //protected override async Task ShowEditEntity(HttpContext context, int customerId, int? incomeId)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //protected override async Task ShowDeleteEntity(HttpContext context, int customerId, int? incomeId)
         //{
         //    throw new NotImplementedException();
         //}
