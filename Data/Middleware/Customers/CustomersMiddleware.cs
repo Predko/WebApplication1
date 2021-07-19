@@ -63,7 +63,7 @@ namespace WebApplication1.Data.Middleware.Customers
         /// </summary>
         /// <param name="context"></param>
         /// <returns>false if an error is occured, otherwise - true</returns>
-        protected override async Task<bool> ShowListOfEntities(HttpContext context, int p1, int p2)
+        protected override async Task<bool> ShowListOfEntities(HttpContext context, int unusedP1, int unusedP2)
         {
             StringBuilder response = new StringBuilder(Startup.BeginHtmlPages)
                     .Append("<main>")
@@ -139,7 +139,7 @@ namespace WebApplication1.Data.Middleware.Customers
         /// <param name="context"></param>
         /// <param name="id"></param>
         /// <returns>False if an error is occured, otherwise - true</returns>
-        protected override async Task<bool> ShowEditEntity(HttpContext context, int customerId, int entityId)
+        protected override async Task<bool> ShowEditEntity(HttpContext context, int customerId, int unusedP)
         {
             DataTable dataTable = Storage[TableName, $"SELECT * FROM {TableName} WHERE Id='{customerId}'"];
             DataRow row = dataTable.Rows[0];
@@ -151,7 +151,7 @@ namespace WebApplication1.Data.Middleware.Customers
             return true;
         }
 
-        protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int entityId)
+        protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int unusedP)
         {
             DataTable dataTable = Storage[TableName, $"SELECT * FROM {TableName} LIMIT 1"];
             DataRow newRow = dataTable.NewRow();
@@ -211,7 +211,7 @@ namespace WebApplication1.Data.Middleware.Customers
             return response;
         }
 
-        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int incomeId)
+        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int unusedP)
         {
             DataTable dataTable;
 
@@ -227,7 +227,7 @@ namespace WebApplication1.Data.Middleware.Customers
             return await ShowListOfEntities(context, -1, -1);
         }
 
-        protected override async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int p2)
+        protected override async Task<bool> ProcessFormRequest(HttpContext context, int customerId, int unusedP)
         {
             DataTable dataTable;
             DataRow row;
@@ -280,7 +280,7 @@ namespace WebApplication1.Data.Middleware.Customers
                 message = $"Данные клиента {row["NameCompany"]} обновлены успешно";
             }
 
-            context.Response.StatusCode = StatusCodes.Status202Accepted;
+            context.Response.StatusCode = StatusCodes.Status200OK;
             context.Response.ContentType = "application/text; charset=UTF-8";
 
             await context.Response.WriteAsync(message);

@@ -40,7 +40,7 @@ namespace WebApplication1.Data.Middleware.Customers
         /// </summary>
         /// <param name="context"></param>
         /// <returns>false if an error is occured, otherwise - true</returns>
-        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int p2)
+        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int unusedP)
         {
             DataView dataViewTable;
             string NameCustomer = "";
@@ -160,9 +160,9 @@ namespace WebApplication1.Data.Middleware.Customers
 
             dataTable.AcceptChanges();
 
-            context.Response.Redirect(ListEntities);
+            context.Response.Redirect(ListEntities + $"?customer={customerId}");
 
-            return await ShowListOfEntities(context, -1, -1);
+            return true;
         }
 
         //protected override async Task<bool> ShowNewEntity(HttpContext context, int customerId, int p2)

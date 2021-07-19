@@ -5,55 +5,55 @@
 // из: https://coderoad.ru/14267781/Сортировка-таблицы-HTML-с-JavaScript#53880407
 // Sort table.
 //onresize='resizebody()' onload='resizebody()'
-var body = document.querySelector('body');
-body.onresize = body.onload = function (event) {
+const body = document.querySelector('body');
+body.onresize = body.onload = (event) => {
     resizebody();
 };
 document.querySelectorAll('th')
-    .forEach(function (th) { return th.addEventListener('click', (function () {
-    var sortOrder = sortOrderFromTh(th);
+    .forEach(th => th.addEventListener('click', (() => {
+    let sortOrder = sortOrderFromTh(th);
     if (sortOrder === undefined) {
         return;
     }
-    var indexTh = Array.prototype.slice.call(th.parentNode.children).indexOf(th);
-    var table = th.closest('table');
-    var tbody = table.querySelector('tbody');
+    const indexTh = Array.prototype.slice.call(th.parentNode.children).indexOf(th);
+    const table = th.closest('table');
+    const tbody = table.querySelector('tbody');
     Array.prototype.slice.call(tbody.querySelectorAll('tr'))
         .sort(getComparer(indexTh, sortOrder))
-        .forEach(function (tr) { return tbody.appendChild(tr); });
+        .forEach((tr) => tbody.appendChild(tr));
     document.getElementById("divTable").scrollTop = 0;
-})); });
-addEventListener("beforeunload", function () {
+})));
+addEventListener("beforeunload", () => {
     // Save current scroll position.
-    var scrollTop = String(document.getElementById("divTable").scrollTop);
+    const scrollTop = String(document.getElementById("divTable").scrollTop);
     sessionStorage.setItem("currentScrollYPosition", scrollTop);
 }, false);
-document.querySelector('table').onclick = function (event) {
+document.querySelector('table').onclick = (event) => {
     if (menuState !== 0) {
         return;
     }
-    var cell = event.target;
+    let cell = event.target;
     if (cell.tagName.toLowerCase() != 'td')
         return;
-    var i = cell.parentNode.rowIndex;
-    var j = cell.cellIndex;
-    var currentTr = cell.parentNode;
-    var action = "edit";
-    var paramName = currentTr.closest('table').getAttribute("data-parameter");
+    let i = cell.parentNode.rowIndex;
+    let j = cell.cellIndex;
+    let currentTr = cell.parentNode;
+    const action = "edit";
+    const paramName = currentTr.closest('table').getAttribute("data-parameter");
     window.location.href = createPathWithNewParameter(action, paramName, currentTr.id);
 };
 // Добавляет контекстное меню к строке таблицы.
-var menu = document.querySelector("#context-menu");
-var menuItems = menu.querySelectorAll(".context-menu__item");
-var table = document.querySelector("#list-entities");
-var menuState = 0;
-var taskItemClassName = "task";
-var taskItemInContext;
-var contextMenuClassName = "context-menu";
-var contextMenuItemClassName = "context-menu__item";
-var contextMenuLinkClassName = "context-menu__link";
-var contextMenuActive = "context-menu--active";
-var selectedTableRow = "selected-row";
+const menu = document.querySelector("#context-menu");
+const menuItems = menu.querySelectorAll(".context-menu__item");
+const table = document.querySelector("#list-entities");
+let menuState = 0;
+const taskItemClassName = "task";
+let taskItemInContext;
+const contextMenuClassName = "context-menu";
+const contextMenuItemClassName = "context-menu__item";
+const contextMenuLinkClassName = "context-menu__link";
+const contextMenuActive = "context-menu--active";
+const selectedTableRow = "selected-row";
 (function () {
     init();
     // Инициализация.
@@ -67,7 +67,7 @@ var selectedTableRow = "selected-row";
     // Если правый клик не на строке таблицы - скрывает.
     function contextListener() {
         document.addEventListener("contextmenu", function (e) {
-            var newTaskItem = clickInsideElement(e, taskItemClassName);
+            const newTaskItem = clickInsideElement(e, taskItemClassName);
             if (newTaskItem !== taskItemInContext) {
                 // Происходит при клике правой кнопкой на строке таблицы.
                 toggleMenuOff();
@@ -87,7 +87,7 @@ var selectedTableRow = "selected-row";
     // Проверяет, соответствует ли элемент(в аргументе события) указанному в переменной className классу.
     // Если да - возвращает элемент, если нет - false.
     function clickInsideElement(e, className) {
-        var el = e.target;
+        let el = e.target;
         if (el.classList.contains(className)) {
             return el;
         }
@@ -119,16 +119,16 @@ var selectedTableRow = "selected-row";
     // Обработчик клика мыши.
     // Если нажата левая кнопка не на контекстном меню - скрывает меню.
     function clickListener() {
-        var leftBtn = 0;
-        var rightBtn = 1;
+        const leftBtn = 0;
+        const rightBtn = 1;
         document.addEventListener("click", function (e) {
-            var clickeElIsLink = clickInsideElement(e, contextMenuLinkClassName);
+            const clickeElIsLink = clickInsideElement(e, contextMenuLinkClassName);
             if (clickeElIsLink) {
                 e.preventDefault();
                 menuItemListener(clickeElIsLink);
             }
             else {
-                var button = e.button;
+                const button = e.button;
                 if (button === rightBtn || button === leftBtn) {
                     toggleMenuOff();
                 }
@@ -136,16 +136,16 @@ var selectedTableRow = "selected-row";
         });
     }
     function menuItemListener(link) {
-        var currentTr = taskItemInContext;
-        var paramName = currentTr.closest("table").getAttribute("data-parameter");
-        var path = createPathWithNewParameter(link.getAttribute("data-action"), paramName, currentTr.id);
+        const currentTr = taskItemInContext;
+        const paramName = currentTr.closest("table").getAttribute("data-parameter");
+        const path = createPathWithNewParameter(link.getAttribute("data-action"), paramName, currentTr.id);
         window.location.href = path;
         toggleMenuOff();
     }
     // Обработчик нажатия клавиши на клавиатуре.
     // Если нажата клавиша ESC - скрывает меню.
     function keyupListener() {
-        var ESC = 27;
+        const ESC = 27;
         window.onkeyup = function (e) {
             if (e.keyCode === ESC) {
                 toggleMenuOff();
@@ -154,16 +154,16 @@ var selectedTableRow = "selected-row";
     }
     // Позиционирование контекстного меню
     //-----------------------------------
-    var menuPosition; // {x , y}
-    var menuPositionX;
-    var menuPositionY;
-    var menuWidth; // Размеры 
-    var menuHeight; // контекстного меню.
-    var windowWidth;
-    var windowHeight;
-    var clickCoords;
-    var clickCoordsX;
-    var clickCoordsY;
+    let menuPosition; // {x , y}
+    let menuPositionX;
+    let menuPositionY;
+    let menuWidth; // Размеры 
+    let menuHeight; // контекстного меню.
+    let windowWidth;
+    let windowHeight;
+    let clickCoords;
+    let clickCoordsX;
+    let clickCoordsY;
     // Закрываем контекстное меню при изменении размера окна.
     function resizeListener() {
         window.onresize = function (e) {
@@ -171,7 +171,7 @@ var selectedTableRow = "selected-row";
         };
     }
     function positionMenu(e) {
-        var offsetMenuFromEdge = 25;
+        const offsetMenuFromEdge = 25;
         clickCoords = getPosition(e);
         clickCoordsX = clickCoords.x;
         clickCoordsY = clickCoords.y;
@@ -194,9 +194,9 @@ var selectedTableRow = "selected-row";
     }
     // Определяем позицию клика.
     function getPosition(e) {
-        var posx = 0;
-        var posy = 0;
-        var me;
+        let posx = 0;
+        let posy = 0;
+        let me;
         me = (!e) ? window.event : me = e;
         if (me.pageX || me.pageY) {
             posx = me.pageX;
@@ -224,7 +224,7 @@ function getComparer(indexTh, asc) {
         }
         return v1.toString().localeCompare(v2);
     }
-    var comparer = function (a, b) {
+    let comparer = function (a, b) {
         return compareCells(getCellValue(asc ? a : b, indexTh), getCellValue(asc ? b : a, indexTh));
     };
     return comparer;
@@ -236,9 +236,9 @@ function getComparer(indexTh, asc) {
 // Меняет значение сортировки на противоположное.
 // Сохраняет порядок сортировки для столбца в сессионном хранилище.
 function sortOrderFromTh(th) {
-    var sortOrder;
-    var resSortOrder;
-    var indexTh = Array.prototype.slice.call(th.parentNode.children).indexOf(th);
+    let sortOrder;
+    let resSortOrder;
+    let indexTh = Array.prototype.slice.call(th.parentNode.children).indexOf(th);
     sortOrder = sessionStorage.getItem("Sort.Order.Th" + indexTh);
     if (sortOrder == undefined || sortOrder == null) {
         switch (th.dataset.sortOrder) {
@@ -264,15 +264,15 @@ function sortOrderFromTh(th) {
 }
 function restoreScrollPosition() {
     // Restore scroll position.
-    var scrollTop = (Number)(sessionStorage.getItem("currentScrollYPosition")), divScrollContainer = document.getElementById("divTable");
-    var indexTh = (Number)(sessionStorage.getItem("Sort.ThIndex"));
+    let scrollTop = (Number)(sessionStorage.getItem("currentScrollYPosition")), divScrollContainer = document.getElementById("divTable");
+    let indexTh = (Number)(sessionStorage.getItem("Sort.ThIndex"));
     if (indexTh === undefined || indexTh === null) {
         indexTh = 0;
         sessionStorage.setItem("Sort.ThIndex", String(indexTh));
         sessionStorage.setItem("Sort.Order.Th" + indexTh, String(true));
     }
-    var so = sessionStorage.getItem("Sort.Order.Th" + indexTh);
-    var sortOrder = (so === undefined) ? undefined : so === 'true';
+    let so = sessionStorage.getItem("Sort.Order.Th" + indexTh);
+    let sortOrder = (so === undefined) ? undefined : so === 'true';
     SortTable(sortOrder, divScrollContainer, indexTh);
     if (scrollTop && divScrollContainer) {
         divScrollContainer.scrollTop = scrollTop;
@@ -280,42 +280,42 @@ function restoreScrollPosition() {
 }
 function SortTable(sortOrder, divScrollContainer, indexTh) {
     if (sortOrder !== undefined) {
-        var table_1 = divScrollContainer.querySelector('table');
-        var tbody_1 = table_1.querySelector('tbody');
-        Array.prototype.slice.call(tbody_1.querySelectorAll('tr'))
+        const table = divScrollContainer.querySelector('table');
+        const tbody = table.querySelector('tbody');
+        Array.prototype.slice.call(tbody.querySelectorAll('tr'))
             .sort(getComparer(indexTh, sortOrder))
-            .forEach(function (tr) { return tbody_1.appendChild(tr); });
+            .forEach((tr) => tbody.appendChild(tr));
     }
 }
 // Создание адреса с параметрами.
 function createPathWithNewParameter(action, param, value) {
-    var url = new URL(window.location.href);
-    var params = url.search;
+    const url = new URL(window.location.href);
+    let params = url.search;
     if (params === "" || params === null || params === undefined) {
         params = "?";
     }
     else {
         params += "&";
     }
-    return url.pathname.concat("/", action, params, param + "=" + value);
+    return url.pathname.concat("/", action, params, `${param}=${value}`);
 }
 function resizebody() {
-    var container = document.getElementById("divTable");
-    var titleTable = document.getElementById("titleTable");
-    var g = document.getElementsByTagName('body')[0];
-    var availableHeight = document.documentElement.clientHeight; //|| g.clientHeight;
-    var headerOffset = document.getElementById("header_body").offsetHeight;
-    var footerOffset = document.getElementById("footer_body").offsetHeight;
-    var stt = getComputedStyle(titleTable);
-    var titleTableOffset = titleTable.offsetHeight;
-    var styleBody = getComputedStyle(g);
-    var containerHeight = (availableHeight - headerOffset - footerOffset - titleTableOffset
+    let container = document.getElementById("divTable");
+    let titleTable = document.getElementById("titleTable");
+    let g = document.getElementsByTagName('body')[0];
+    let availableHeight = document.documentElement.clientHeight; //|| g.clientHeight;
+    let headerOffset = document.getElementById("header_body").offsetHeight;
+    let footerOffset = document.getElementById("footer_body").offsetHeight;
+    let stt = getComputedStyle(titleTable);
+    let titleTableOffset = titleTable.offsetHeight;
+    let styleBody = getComputedStyle(g);
+    const containerHeight = (availableHeight - headerOffset - footerOffset - titleTableOffset
         - parseInt(stt.paddingBottom)
         - parseInt(stt.paddingTop)
         - parseInt(styleBody.marginBottom)
         - parseInt(styleBody.marginTop));
     container.style.height = containerHeight + "px";
-    document.cookie = "containerHeight=" + containerHeight + "; path=/; max-age=10000";
+    document.cookie = `containerHeight=${containerHeight}; path=/; max-age=10000`;
     restoreScrollPosition();
     container.style.display = "block";
 }

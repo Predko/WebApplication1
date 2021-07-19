@@ -40,7 +40,7 @@ namespace WebApplication1.Data.Middleware.Customers
         /// </summary>
         /// <param name="context"></param>
         /// <returns>false if an error is occured, otherwise - true</returns>
-        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int p2)
+        protected override async Task<bool> ShowListOfEntities(HttpContext context, int customerId, int unusedP)
         {
             DataView dataViewTable;
 
@@ -117,7 +117,7 @@ namespace WebApplication1.Data.Middleware.Customers
             return true;
         }
 
-        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int customerId, int expensesId)
+        protected override async Task<bool> ShowDeleteEntity(HttpContext context, int unusedP, int expensesId)
         {
             DataTable dataTable;
 

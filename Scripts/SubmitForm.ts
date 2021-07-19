@@ -7,33 +7,46 @@ form.addEventListener("submit", function (event)
 {
     event.preventDefault();
 
-    submitForm();
+    submitForm()
+        .then(alert)
+        .catch(alert);
 });
+
 
 function submitForm()
 {
-    const XHR = new XMLHttpRequest();
-
-    // Bind the FormData object and the form element
-    const FD = new FormData(form);
-
-    // Define what happens on successful data submission
-    XHR.addEventListener("load", function (event)
+    return new Promise((resolve, reject) =>
     {
-        alert(XHR.response);
+
+        const XHR = new XMLHttpRequest();
+
+        // Bind the FormData object and the form element
+        const FD = new FormData(form);
+
+        // Define what happens on successful data submission
+        XHR.addEventListener("load", function (event)
+        {
+            if (this.status == 200)
+            {
+                return resolve(this.response);
+            } else
+            {
+                return reject(new Error(this.statusText));
+            }
+        });
+
+        // Define what happens in case of error
+        XHR.addEventListener("error", function (event)
+        {
+            return reject(new Error('Oops! Something went wrong.'));
+        });
+
+        // Set up our request
+        XHR.open("POST", "/customers/edit/submit");
+
+        // The data sent is what the user provided in the form
+        XHR.send(FD);
     });
-
-    // Define what happens in case of error
-    XHR.addEventListener("error", function (event)
-    {
-        alert('Oops! Something went wrong.');
-    });
-
-    // Set up our request
-    XHR.open("POST", "/customers/edit/submit");
-
-    // The data sent is what the user provided in the form
-    XHR.send(FD);
 }
 
 // XHR.onprogress = function (event)
